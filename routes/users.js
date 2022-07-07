@@ -30,7 +30,7 @@ initializePassport(
         const DataBase = require("./db"); // db.js
         const db = new DataBase();
         try {
-            let userFound = db.getUserById(id);
+            let userFound = db.findUserByID(id);
             db.close();
             return userFound;
         } catch (e) {
@@ -60,6 +60,8 @@ router.get("/", (req, res) => {
     // users page
     console.log(req.query.name);
     res.send("User List");
+    // home page
+    // res.render("users", { name: req.user.name });
 });
 
 router.get("/login", (req, res) => {
@@ -70,7 +72,8 @@ router.get("/login", (req, res) => {
 router.post(
     "/login",
     passport.authenticate("local", {
-        successRedirect: "/",
+        // successRedirect: "/",
+        successRedirect: "/users",
         failureRedirect: "/users/login",
         failureFlash: true,
     })
@@ -105,22 +108,22 @@ router.post("/register", async (req, res) => {
     }
 });
 
-router.post("/", (req, res) => {
-    const isValid = false;
-    if (isValid) {
-        console.log("Valid user");
-        users.push({ firstName: req.body.firstName });
-        // users.push(req.body);
-        res.redirect(`/users/${users.length - 1}`);
-    } else {
-        console.log("Invalid user");
-        res.render("users/register", {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            error: "Invalid user",
-        });
-    }
-});
+// router.post("/", (req, res) => {
+//     const isValid = false;
+//     if (isValid) {
+//         console.log("Valid user");
+//         users.push({ firstName: req.body.firstName });
+//         // users.push(req.body);
+//         res.redirect(`/users/${users.length - 1}`);
+//     } else {
+//         console.log("Invalid user");
+//         res.render("users/register", {
+//             firstName: req.body.firstName,
+//             lastName: req.body.lastName,
+//             error: "Invalid user",
+//         });
+//     }
+// });
 
 // router
 //     .route("/:id") // /users/:id

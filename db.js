@@ -40,6 +40,18 @@ class DataBase {
             const sql = `SELECT * FROM Users WHERE email = ?`;
             db.get(sql, [email], (err, row) => {
                 if (err) return reject("Read error: " + err.message);
+                console.log(row);
+                resolve(row);
+            });
+        });
+    }
+
+    findUserByID(id) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT * FROM Users WHERE ID = ?`;
+            db.get(sql, [id], (err, row) => {
+                if (err) return reject("Read error: " + err.message);
+                console.log(row);
                 resolve(row);
             });
         });

@@ -37,9 +37,16 @@ function initialize(passport) {
         new LocalStrategy({ usernameField: "email" }, authenticateUser)
     );
     passport.serializeUser((user, done) => done(null, user.ID));
-    passport.deserializeUser((id, done) => {
-        return done(null, getUserById(id));
-    });
+    passport.deserializeUser(
+        (id, done) =>
+            async function () {
+                const DataBase = require("./db"); // db.js
+                const db = new DataBase();
+                const user = await db.findUserById(id);
+                db.close();
+                return done(null, user.firstName);
+            }
+    );
 }
 
 module.exports = initialize;
