@@ -1,31 +1,27 @@
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 
-function initialize(passport) {
+function initialize(passport, getUserByEmail, getUserByID) {
     const authenticateUser = async (email, password, done) => {
         try {
-            const DataBase = require("./db"); // db.js
-            const db = new DataBase();
-            const user = await db.findUserByEmail(email);
-            db.close();
-
+            const user = await getUserByEmail(email);
             if (user == null) {
                 return done(user, false, {
-                    message: "No user with this email",
+                    message: "Incorrect email or password.", // wrong email
                 });
             }
-            try {
-                const isValidPassword = await bcrypt.compare(
-                    password,
-                    user.password
-                );
-                if (isValidPassword) {
-                    return done(null, user);
-                } else {
-                    return done(null, false, { message: "Invalid password" });
-                }
-            } catch (e) {
-                return done(e);
+
+            const isValidPassword = await bcrypt.compare(
+                password,
+                user.password
+            );
+
+            if (isValidPassword) {
+                return done(null, user);
+            } else {
+                return done(null, false, {
+                    message: "Incorrect email or password.", // wrong password
+                });
             }
         } catch (e) {
             console.log(`Error while authenticating: ${e}`);
@@ -37,16 +33,10 @@ function initialize(passport) {
         new LocalStrategy({ usernameField: "email" }, authenticateUser)
     );
     passport.serializeUser((user, done) => done(null, user.ID));
-    passport.deserializeUser(
-        (id, done) =>
-            async function () {
-                const DataBase = require("./db"); // db.js
-                const db = new DataBase();
-                const user = await db.findUserById(id);
-                db.close();
-                return done(null, user.firstName);
-            }
-    );
+    passport.deserializeUser(async (id, done) => {
+        const user = await getUserByID(id);
+        return done(null, user);
+    });
 }
 
 module.exports = initialize;

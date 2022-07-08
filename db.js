@@ -2,10 +2,6 @@ const sqlite3 = require("sqlite3").verbose();
 let db;
 
 class DataBase {
-    constructor() {
-        this.open();
-    }
-
     open() {
         db = new sqlite3.Database("./112.db", sqlite3.OPEN_READWRITE, (err) => {
             if (err) return console.error(err.message);
