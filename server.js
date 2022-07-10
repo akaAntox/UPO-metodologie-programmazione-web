@@ -1,7 +1,6 @@
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config(); // load .env file
 }
-
 const express = require("express"); // import express
 const morgan = require("morgan"); // log requests
 const bcrypt = require("bcrypt"); // hash passwords
@@ -61,6 +60,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
+const path = require('path');
+app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
 
 app.get("/", checkAuthenticated, (req, res) => {
     res.render("index.ejs", { name: req.user.first_name });
