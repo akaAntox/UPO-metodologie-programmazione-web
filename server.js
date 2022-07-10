@@ -129,12 +129,40 @@ app.delete("/logout", function (req, res, next) {
     });
 });
 
+app.get("/profile", checkAuthenticated, (req, res) => {
+    res.render("profile.ejs", {
+        cf: req.user.CF,
+        name: req.user.first_name,
+        surname: req.user.last_name,
+        city: req.user.city,
+        email: req.user.email
+    });
+});
+
+app.post("/profile", checkAuthenticated, async (req, res) => {
+    try {
+        db.open();
+        db.updateUser(req.user.ID, req.body.firstName, req.body.lastName, req.body.city);
+        db.close();
+        res.render("profile.ejs", {
+            cf: req.user.CF,
+            name: req.body.firstName,
+            surname: req.body.lastName,
+            city: req.body.city,
+            email: req.user.email,
+            success: "Profilo aggiornato con successo"
+        });
+    } catch (e) {
+        console.log(`Error while updating profile: ${e}`);
+        res.render("/profile", { name: req.user.first_name, error: "Aggiornamento profilo fallito" });
+    }
+});
+
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         console.log("User is already logged in");
         return next();
     }
-
     res.redirect("/login");
 }
 

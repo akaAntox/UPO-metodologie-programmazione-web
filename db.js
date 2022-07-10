@@ -45,6 +45,16 @@ class DataBase {
         });
     }
 
+    updateUser(id, firstName, lastName, city) {
+        return new Promise((resolve, reject) => {
+            const sql = `UPDATE Users SET first_name = ?, last_name = ?, city = ? WHERE ID = ?`;
+            db.run(sql, [firstName, lastName, city, id], (err, row) => {
+                if (err) return reject("Read error: " + err.message);
+                resolve(row);
+            });
+        });
+    }
+
     findUserByEmail(email) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE email = ?`;
