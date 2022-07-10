@@ -66,6 +66,19 @@ app.get("/", checkAuthenticated, (req, res) => {
     res.render("index.ejs", { name: req.user.first_name });
 });
 
+app.post("/", checkAuthenticated, (req, res) => {
+    try {
+        db.open();
+        db.addNewRequest(req.user.ID, req.body.content, req.body.location, req.body.address, req.body.latitude, req.body.longitude);
+        db.close();
+        res.render("index.ejs", { name: req.user.first_name, success: "La tua richiesta verrà presa in carico prima possibile." });
+    } catch (e) {
+        console.log(`Error while adding request: ${e}`);
+        db.close();
+        res.render("index.ejs", { name: req.user.first_name, error: "Errore nell'aggiunta della richiesta" });
+    }
+});
+
 app.get("/login", checkNotAuthenticated, (req, res) => {
     res.render("login.ejs");
 });
@@ -90,17 +103,18 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
         db.open();
         db.addNewUser(
             // add new user to database
-            req.body.codiceFiscale,
             req.body.firstName,
             req.body.lastName,
+            req.body.gender,
+            req.body.birthDate,
             req.body.city,
+            req.body.province,
             req.body.email,
             hashedPassword
         );
         db.close();
         res.redirect("/login");
     } catch (e) {
-        // res.send("Error");
         console.log("Error while registering");
         res.redirect("/register");
     }

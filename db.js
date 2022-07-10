@@ -16,13 +16,27 @@ class DataBase {
         });
     }
 
-    addNewUser(cf, firstName, lastName, city, email, password) {
-        const sql = `INSERT INTO Users(cf, first_name, last_name, city, email, password)
-                VALUES(?, ?, ?, ?, ?, ?)`;
+    addNewUser(firstName, lastName, gender, birthDate, city, province, email, password) {
         return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO Users(cf, first_name, last_name, city, email, password)
+                    VALUES(?, ?, ?, ?, ?, ?)`;
+
+            const codice_fiscale = require("codicefiscalejs-node");
+            const birth_date = birthDate.split("-");
+            const cf_computed = codice_fiscale.compute({
+                nome: firstName,
+                cognome: lastName,
+                sesso: gender.toUpperCase()[0],
+                comune: city,
+                provincia: province.toUpperCase(),
+                giorno: parseInt(birth_date[2]),
+                mese: parseInt(birth_date[1]),
+                anno: parseInt(birth_date[0]),
+            });
+
             db.run(
                 sql,
-                [cf, firstName, lastName, city, email, password],
+                [cf_computed, firstName, lastName, city, email, password],
                 (err, row) => {
                     if (err) return reject(err);
                     resolve(row);
@@ -36,7 +50,6 @@ class DataBase {
             const sql = `SELECT * FROM Users WHERE email = ?`;
             db.get(sql, [email], (err, row) => {
                 if (err) return reject("Read error: " + err.message);
-                console.log(row);
                 resolve(row);
             });
         });
@@ -47,9 +60,26 @@ class DataBase {
             const sql = `SELECT * FROM Users WHERE ID = ?`;
             db.get(sql, [id], (err, row) => {
                 if (err) return reject("Read error: " + err.message);
-                console.log(row);
                 resolve(row);
             });
+        });
+    }
+
+    addNewRequest(user_id, content, location, address, lat, long) {
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO Requests(user_ID, content, location, address, latitude, longitude, status, date) 
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            var date = String(new Date().toLocaleString("it-IT"));
+
+            db.run(
+                sql,
+                [user_id, content, location, address, lat, long, 1, date],
+                (err, row) => {
+                    if (err) return reject(err);
+                    resolve(row);
+                }
+            );
         });
     }
 }
