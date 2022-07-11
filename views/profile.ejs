@@ -1,6 +1,9 @@
 <%- include('header') %>
 <h1>Ciao <%= name %>, questo è il tuo profilo!</h1>
-<% var success, failure;  %>
+<form action="/profile/requests" method="get">
+  <input type="submit" value="Le mie richieste" />
+</form>
+<% var success, failure; %>
 <% if (success) { %>
 <div class="alert alert-success" role="alert"><%= success %></div>
 <% } %>

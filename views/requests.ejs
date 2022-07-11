@@ -1,0 +1,7 @@
+<h1>Le mie richieste</h1>
+<% if (requests) { %>
+<% requests.forEach(function(message) { %>
+<div class="alert alert-danger" role="alert">
+  <%= message %>
+</div>
+<% });} %>

@@ -92,15 +92,36 @@ class DataBase {
             );
         });
     }
-}
 
-// query data
-// const sql = `SELECT * FROM users`;
-// db.all(sql, [], (err, rows) => {
-//   if (err) return console.error(err.message);
-//   rows.forEach((row) => {
-//     console.log(row);
-//   });
-// });
+    getRequestsByUserID(user_id) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT * FROM Requests WHERE user_ID = ?`;
+            const rows = [];
+            db.all(sql, [user_id], (err, row) => {
+                if (err) return reject("Read error: " + err.message);
+                row.forEach((row) => {
+                    resolve(row);
+                });
+            });
+        });
+        // return new Promise((resolve, reject) => {
+        //     const db = new sqlite3.Database(database);
+        //     const queries = [];
+        //     db.each(`SELECT rowid as key, * FROM ${table}`, (err, row) => {
+        //         if (err) {
+        //             reject(err); // optional: you might choose to swallow errors.
+        //         } else {
+        //             queries.push(row); // accumulate the data
+        //         }
+        //     }, (err, n) => {
+        //         if (err) {
+        //             reject(err); // optional: again, you might choose to swallow this error.
+        //         } else {
+        //             resolve(queries); // resolve the promise
+        //         }
+        //     });
+        // });
+    }
+}
 
 module.exports = DataBase;

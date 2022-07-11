@@ -163,7 +163,6 @@ app.post("/profile", checkAuthenticated, async (req, res) => {
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        console.log("User is already logged in");
         return next();
     }
     res.redirect("/login");
@@ -171,7 +170,6 @@ function checkAuthenticated(req, res, next) {
 
 function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        console.log("User is already logged in");
         return res.redirect("/");
     }
     next();
