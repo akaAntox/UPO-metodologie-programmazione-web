@@ -82,7 +82,7 @@ app.post("/", checkAuthenticated, (req, res) => {
     }
 });
 
-app.get("/login", checkNotAuthenticated, (req, res) => {
+app.get("/login", checkNotAuthenticated, (_req, res) => {
     res.render("login.ejs");
 });
 
@@ -96,7 +96,7 @@ app.post(
     })
 );
 
-app.get("/register", checkNotAuthenticated, (req, res) => {
+app.get("/register", checkNotAuthenticated, (_req, res) => {
     res.render("register.ejs");
 });
 
@@ -106,14 +106,14 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
         db.open();
         db.addNewUser(
             // add new user to database
-            req.body.firstName,
+            [req.body.firstName,
             req.body.lastName,
             req.body.gender,
             req.body.birthDate,
             req.body.city,
             req.body.province,
             req.body.email,
-            hashedPassword
+            hashedPassword]
         );
         db.close();
         res.redirect("/login");
@@ -157,8 +157,17 @@ app.post("/profile", checkAuthenticated, async (req, res) => {
         });
     } catch (e) {
         console.log(`Error while updating profile: ${e}`);
-        res.render("/profile", { name: req.user.first_name, error: "Aggiornamento profilo fallito" });
+        res.render("profile.ejs", { name: req.user.first_name, error: "Aggiornamento profilo fallito" });
     }
+});
+
+app.get("/profile/requests", checkAuthenticated, async (req, res) => {
+    db.open();
+    const requests = await db.getRequestsByUserID(req.user.ID);
+    db.close();
+    res.render("requests.ejs", {
+        requests: requests        
+    })
 });
 
 function checkAuthenticated(req, res, next) {

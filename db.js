@@ -16,19 +16,29 @@ class DataBase {
         });
     }
 
-    addNewUser(firstName, lastName, gender, birthDate, city, province, email, password) {
+    /*
+    0: firstName
+    1: lastName
+    2: gender
+    3: birthDate
+    4: city
+    5: province
+    6: email
+    7: password
+    */
+    addNewUser(user) {
         return new Promise((resolve, reject) => {
             const sql = `INSERT INTO Users(cf, first_name, last_name, city, email, password)
                     VALUES(?, ?, ?, ?, ?, ?)`;
 
             const codice_fiscale = require("codicefiscalejs-node");
-            const birth_date = birthDate.split("-");
+            const birth_date = user[3].split("-");
             const cf_computed = codice_fiscale.compute({
-                nome: firstName,
-                cognome: lastName,
-                sesso: gender.toUpperCase()[0],
-                comune: city,
-                provincia: province.toUpperCase(),
+                nome: user[0],
+                cognome: user[1],
+                sesso: user[2].toUpperCase()[0],
+                comune: user[4],
+                provincia: user[5].toUpperCase(),
                 giorno: parseInt(birth_date[2]),
                 mese: parseInt(birth_date[1]),
                 anno: parseInt(birth_date[0]),
@@ -36,7 +46,7 @@ class DataBase {
 
             db.run(
                 sql,
-                [cf_computed, firstName, lastName, city, email, password],
+                [cf_computed, user[0], user[1], user[4], user[6], user[7]],
                 (err, row) => {
                     if (err) return reject(err);
                     resolve(row);
@@ -80,7 +90,7 @@ class DataBase {
             const sql = `INSERT INTO Requests(user_ID, content, location, address, latitude, longitude, status, date) 
                     VALUES(?, ?, ?, ?, ?, ?, ?, ?)`;
 
-            var date = String(new Date().toLocaleString("it-IT"));
+            const date = String(new Date().toLocaleString("it-IT"));
 
             db.run(
                 sql,
@@ -96,31 +106,11 @@ class DataBase {
     getRequestsByUserID(user_id) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Requests WHERE user_ID = ?`;
-            const rows = [];
-            db.all(sql, [user_id], (err, row) => {
-                if (err) return reject("Read error: " + err.message);
-                row.forEach((row) => {
-                    resolve(row);
-                });
+            db.all(sql, [user_id], (err, rows) => {
+                if(err) throw reject(err);
+                resolve(rows);
             });
         });
-        // return new Promise((resolve, reject) => {
-        //     const db = new sqlite3.Database(database);
-        //     const queries = [];
-        //     db.each(`SELECT rowid as key, * FROM ${table}`, (err, row) => {
-        //         if (err) {
-        //             reject(err); // optional: you might choose to swallow errors.
-        //         } else {
-        //             queries.push(row); // accumulate the data
-        //         }
-        //     }, (err, n) => {
-        //         if (err) {
-        //             reject(err); // optional: again, you might choose to swallow this error.
-        //         } else {
-        //             resolve(queries); // resolve the promise
-        //         }
-        //     });
-        // });
     }
 }
 
