@@ -8,6 +8,7 @@ const passport = require("passport"); // passport-config.js
 const flash = require("express-flash"); // flash messages
 const session = require("express-session"); // session middleware
 const methodOverride = require("method-override"); // override POST method (delete)
+const jwt = require("jsonwebtoken"); // generate tokens
 
 const DataBase = require("./db"); // db.js
 const db = new DataBase();
@@ -94,6 +95,10 @@ app.post(
         failureRedirect: "/login",
         failureFlash: true,
     })
+    // (req, res) => {
+    //     const accessToken = generateAccessToken(req.user);
+    //     const refreshToken = jwt.sign(req.user, process.env.REFRESH_JWT_TOKEN_KEY);
+    // }
 );
 
 app.get("/register", checkNotAuthenticated, (_req, res) => {
@@ -162,12 +167,15 @@ app.post("/profile", checkAuthenticated, async (req, res) => {
 });
 
 app.get("/profile/requests", checkAuthenticated, async (req, res) => {
-    db.open();
-    const requests = await db.getRequestsByUserID(req.user.ID);
-    db.close();
-    res.render("requests.ejs", {
-        requests: requests        
-    })
+    try {
+        db.open();
+        const requests = await db.getRequestsByUserID(req.user.ID);
+        db.close();
+        res.render("requests.ejs", { requests: requests });
+    } catch (e) {
+        console.log(`Error while showing requests: ${e}`);
+        res.render("profile.ejs", { name: req.user.first_name, error: "Impossibile mostrare le richieste" });
+    }
 });
 
 function checkAuthenticated(req, res, next) {
@@ -182,6 +190,22 @@ function checkNotAuthenticated(req, res, next) {
         return res.redirect("/");
     }
     next();
+}
+
+function generateAccessToken(user) {
+    return jwt.sign(user, process.env.JWT_TOKEN_KEY, { expiresIn: "1h" });
+}
+
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (token == null) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_JWT_TOKEN, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
 }
 
 app.listen(port, () => {

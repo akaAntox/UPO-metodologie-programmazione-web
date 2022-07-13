@@ -4,14 +4,14 @@ let db;
 class DataBase {
     open() {
         db = new sqlite3.Database("./112.db", sqlite3.OPEN_READWRITE, (err) => {
-            if (err) return console.error(err.message);
+            if (err) throw console.error(err.message);
             console.log("Connected to the database.");
         });
     }
 
     close() {
         db.close((err) => {
-            if (err) return console.error(err.message);
+            if (err) throw console.error(err.message);
             console.log("Close the database connection.");
         });
     }
@@ -48,7 +48,7 @@ class DataBase {
                 sql,
                 [cf_computed, user[0], user[1], user[4], user[6], user[7]],
                 (err, row) => {
-                    if (err) return reject(err);
+                    if(err) throw reject(err);
                     resolve(row);
                 }
             );
@@ -59,7 +59,7 @@ class DataBase {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET first_name = ?, last_name = ?, city = ? WHERE ID = ?`;
             db.run(sql, [firstName, lastName, city, id], (err, row) => {
-                if (err) return reject("Read error: " + err.message);
+                if(err) throw reject(err);
                 resolve(row);
             });
         });
@@ -69,7 +69,7 @@ class DataBase {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE email = ?`;
             db.get(sql, [email], (err, row) => {
-                if (err) return reject("Read error: " + err.message);
+                if(err) throw reject(err);
                 resolve(row);
             });
         });
@@ -79,7 +79,7 @@ class DataBase {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE ID = ?`;
             db.get(sql, [id], (err, row) => {
-                if (err) return reject("Read error: " + err.message);
+                if(err) throw reject(err);
                 resolve(row);
             });
         });
@@ -96,7 +96,7 @@ class DataBase {
                 sql,
                 [user_id, content, location, address, lat, long, 1, date],
                 (err, row) => {
-                    if (err) return reject(err);
+                    if(err) throw reject(err);
                     resolve(row);
                 }
             );
