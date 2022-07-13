@@ -5,14 +5,12 @@ class DataBase {
     open() {
         db = new sqlite3.Database("./112.db", sqlite3.OPEN_READWRITE, (err) => {
             if (err) throw console.error(err.message);
-            console.log("Connected to the database.");
         });
     }
 
     close() {
         db.close((err) => {
             if (err) throw console.error(err.message);
-            console.log("Close the database connection.");
         });
     }
 
@@ -103,10 +101,30 @@ class DataBase {
         });
     }
 
-    getRequestsByUserID(user_id) {
+    getRequestsByUserID(user_id, filter) {
         return new Promise((resolve, reject) => {
-            const sql = `SELECT * FROM Requests WHERE user_ID = ?`;
+            const sql = `SELECT * FROM Requests WHERE user_ID = ?` + filter;
             db.all(sql, [user_id], (err, rows) => {
+                if(err) throw reject(err);
+                resolve(rows);
+            });
+        });
+    }
+    
+    getRequests(filter) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT * FROM Requests INNER JOIN Users ON Requests.user_ID=Users.ID ` + filter;
+            db.all(sql, [], (err, rows) => {
+                if(err) throw reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    setRequestStatus(requestID, status) {
+        return new Promise((resolve, reject) => {
+            const sql = `UPDATE Requests SET status = ? WHERE ID = ?`;
+            db.run(sql, [status, requestID], (err, rows) => {
                 if(err) throw reject(err);
                 resolve(rows);
             });

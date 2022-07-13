@@ -63,11 +63,21 @@ app.use(passport.session());
 app.use(methodOverride("_method"));
 const path = require('path');
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+app.use('/icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/icons')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
 
-app.get("/", checkAuthenticated, (req, res) => {
-    res.render("index.ejs", { name: req.user.first_name });
+app.get("/", checkAuthenticated, async (req, res) => {
+    try {
+        db.open();
+        const requests = await db.getRequests("ORDER BY date DESC LIMIT 5");
+        db.close();
+        res.render("index.ejs", { name: req.user.first_name, requests: requests });
+    } catch (e) {
+        console.log(`Error while showing requests: ${e}`);
+        db.close();
+        res.render("index.ejs", { name: req.user.first_name, requests: [], error: "Impossibile mostrare le richieste" });
+    }
 });
 
 app.post("/", checkAuthenticated, (req, res) => {
@@ -118,12 +128,13 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
             req.body.city,
             req.body.province,
             req.body.email,
-            hashedPassword]
+                hashedPassword]
         );
         db.close();
         res.redirect("/login");
     } catch (e) {
         console.log("Error while registering");
+        db.close();
         res.redirect("/register");
     }
 });
@@ -162,19 +173,38 @@ app.post("/profile", checkAuthenticated, async (req, res) => {
         });
     } catch (e) {
         console.log(`Error while updating profile: ${e}`);
+        db.close();
         res.render("profile.ejs", { name: req.user.first_name, error: "Aggiornamento profilo fallito" });
     }
 });
 
-app.get("/profile/requests", checkAuthenticated, async (req, res) => {
+app.get("/requests", checkAuthenticated, async (req, res) => {
     try {
         db.open();
-        const requests = await db.getRequestsByUserID(req.user.ID);
+        const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC");
         db.close();
-        res.render("requests.ejs", { requests: requests });
+        res.render("requests.ejs", { requests: requests, name: req.user.first_name, surname: req.user.last_name });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
-        res.render("profile.ejs", { name: req.user.first_name, error: "Impossibile mostrare le richieste" });
+        db.close();
+        // res.render("profile.ejs", { name: req.user.first_name, error: "Impossibile mostrare le richieste" });
+        prevURL = req.header('Referer') || '/';
+        res.redirect(prevURL);
+    }
+});
+
+app.delete("/requests/:requestID", (req, res) => {
+    try {
+        db.open();
+        db.setRequestStatus(req.params.requestID, 4);
+        db.close();
+        prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    } catch (e) {
+        console.log(`Error while canceling request: ${e}`);
+        db.close();
+        prevURL = req.header('Referer') || '/';
+        res.status(400).redirect(prevURL);
     }
 });
 

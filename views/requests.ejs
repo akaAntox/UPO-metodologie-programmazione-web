@@ -1,19 +1,30 @@
 <link rel="stylesheet" href="../css/bootstrap.min.css">
 <h1>Le mie richieste</h1>
-<% if (requests) { %>
-  <div class="row">
-    <div class="col-sm-6">
 <% requests.forEach(function(request) { %>
-<div class="card" style="width: 18rem;">
-  <div class="card-body">
-  <p><%= request.content %></p>
-  <p><%= request.location %></p>
-  <p><%= request.address %></p>
-  <p><%= request.status %></p>
-  <a class="btn btn-success">Accetta richiesta</a>
-</div>
-</div>
-<% }); %>
-</div>
-</div>
-<% } %>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <p>
+        <%= request.content %>
+      </p>
+      <p>
+        <%= request.location %>
+      </p>
+      <p>
+        <%= request.address %>
+      </p>
+      <p>
+        <%= request.status %>
+      </p>
+      <p>
+        <%= surname + " " + name %>
+      </p>
+      <p>
+        <%= request.date %>
+      </p>
+      <!-- <a class="btn btn-success">Accetta richiesta</a> -->
+      <form action=<%= "/requests/" + request.ID + "?_method=DELETE" %> method="POST">
+        <button type="submit" id="cancel_request" class="btn btn-danger">Annulla richiesta</a>
+      </form>
+    </div>
+  </div>
+  <% }); %>
