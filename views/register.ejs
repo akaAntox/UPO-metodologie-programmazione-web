@@ -1,5 +1,5 @@
 <%- include('header') %>
-<h1>Register</h1>
+  <!-- <h1>Register</h1>
 <% if (messages.error) { %>
 <% messages.error.forEach(function(message) { %>
 <div class="alert alert-danger" role="alert">
@@ -23,4 +23,96 @@
     <button type="submit">Register</button>
   </div>
 </form>
-<a href="/login">Login</a>
+<a href="/login">Login</a> -->
+  <%- include('header') %>
+    <link rel="stylesheet" type="text/css" href="css/login.css" />
+    <section class="vh-100 gradient-custom">
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card bg-dark text-white" style="border-radius: 1rem">
+              <div class="card-body p-5 text-center">
+                <div class="mb-md-5 mt-md-4 pb-5">
+                  <h2 class="fw-bold mb-5 text-uppercase">Crea un account</h2>
+                  <% if (messages.error) { %>
+                    <% messages.error.forEach(function(message) { %>
+                      <div class="alert alert-danger" role="alert">
+                        <%= message %>
+                      </div>
+                      <% });} %>
+                        <form action="/register" method="post">
+
+                          <div class="row">
+                            <div class="form-outline form-white col-md-6 mb-4">
+                              <input type="text" id="firstName" name="firstName" class="form-control form-control-lg" />
+                              <label class="form-label" for="firstName">Nome</label>
+                            </div>
+
+                            <div class="form-outline form-white col-md-6 mb-4">
+                              <input type="text" id="lastName" name="lastName" class="form-control form-control-lg" />
+                              <label class="form-label" for="lastName">Cognome</label>
+                            </div>
+                          </div>
+
+                          <div class="row">
+                            <div class="form-outline form-white col-md-8 mb-4">
+                              <input type="text" id="city" name="city" class="form-control form-control-lg" />
+                              <label class="form-label" for="city">Città</label>
+                            </div>
+
+                            <div class="form-outline form-white col-md-4 mb-4">
+                              <input type="text" id="province" name="province" class="form-control form-control-lg" />
+                              <label class="form-label" for="province">Sigla provincia</label>
+                            </div>
+                          </div>
+                          
+                          <div class="d-md-flex justify-content-start align-items-center mb-4 py-2">
+
+                            <h6 class="mb-0 me-4">Sesso: </h6>
+
+                            <div class="form-check form-check-inline mb-0 me-4">
+                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
+                                value="male" />
+                              <label class="form-check-label" for="maleGender">Maschio</label>
+                            </div>
+
+                            <div class="form-check form-check-inline mb-0 me-4">
+                              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
+                                value="female" />
+                              <label class="form-check-label" for="femaleGender">Femmina</label>
+                            </div>
+
+                          </div>
+
+                          <div class="form-outline form-white mb-4">
+                            <input type="text" id="email" name="email" class="form-control form-control-lg" />
+                            <label class="form-label" for="email">Email</label>
+                          </div>
+
+                          <div class="form-outline form-white mb-4">
+                            <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                            <label class="form-label" for="password">Password</label>
+                          </div>
+
+                          <div class="form-outline form-white mb-4">
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control form-control-lg" />
+                            <label class="form-label" for="confirmPassword">Conferma password</label>
+                          </div>
+
+                          <button class="btn btn-outline-light btn-lg px-5" type="submit">
+                            Registrati
+                          </button>
+                        </form>
+                </div>
+                <div>
+                  <p class="mb-0">
+                    Hai già un account?
+                    <a href="/Login" class="text-white-50 fw-bold">Accedi</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>

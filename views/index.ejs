@@ -1,68 +1,64 @@
 <%- include('header') %>
-    <script>
-        navigator.geolocation.getCurrentPosition(function (position, err) {
-            if (err) throw err;
-            document.getElementById("latitude").value = position.coords.latitude;
-            document.getElementById("losrngitude").value = position.coords.longitude;
-        });
-    </script>
-    <h1>Ciao <%= name %>
-    </h1>
-    <form action="/logout?_method=DELETE" method="POST">
-        <button type="submit">Logout</button>
-    </form>
-    <form action="/profile" method="get">
-        <input type="submit" value="Il mio profilo" />
-    </form>
-    <h1>Effettua una richiesta di emergenza</h1>
-    <% var success, failure; %>
-        <% if (success) { %>
-            <div class="alert alert-success" role="alert">
-                <%= success %>
-            </div>
-            <% } %>
-                <% if (failure) { %>
-                    <div class="alert alert-danger" role="alert">
-                        <%= failure %>
-                    </div>
-                    <% } %>
-                        <form action="/" method="POST">
-                            <label for="content">Content</label><textarea id="content" name="content" rows="3" cols="30"
-                                required></textarea><br />
-                            <label for="location">Location</label><input type="text" id="location" name="location"
-                                required /><br />
-                            <label for="address">Address</label><input type="text" id="address" name="address"
-                                required /><br />
-                            <input type="hidden" id="latitude" name="latitude" />
-                            <input type="hidden" id="longitude" name="longitude" />
-                            <button type="submit">Manda richiesta</button>
-                        </form>
-                        <% if (requests) { %>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <% requests.forEach(function(request) { %>
-                                        <div class="card" style="width: 18rem;">
-                                            <div class="card-body">
-                                                <p>
-                                                    <%= request.content %>
-                                                </p>
-                                                <p> Location: <%= request.location %>
-                                                </p>
-                                                <p> Address: <%= request.address %>
-                                                </p>
-                                                <p> Status: <%= request.status %>
-                                                </p>
-                                                <p>
-                                                    <%= request.date %>
-                                                </p>
-                                                <i class="bi bi-trash-fill"></i>
-                                                <form action=<%="/requests/" + request.ID + "?_method=DELETE" %>
-                                                    method="POST">
-                                                    <button type="submit" id="cancel_request" class="btn btn-danger">Annulla richiesta</a>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <% }); %>
-                                </div>
-                            </div>
-                            <% } %>
+<script>
+  navigator.geolocation.getCurrentPosition(function(position, err) {
+    if (err) throw err;
+    document.getElementById("latitude").value = position.coords.latitude;
+    document.getElementById("losrngitude").value = position.coords.longitude;
+  });
+</script>
+<h1>Ciao <%= name %>
+</h1>
+<form action="/logout?_method=DELETE" method="POST">
+  <button type="submit">Logout</button>
+</form>
+<form action="/profile" method="get">
+  <input type="submit" value="Il mio profilo" />
+</form>
+<h1>Effettua una richiesta di emergenza</h1>
+<% var success, failure; %>
+<% if (success) { %>
+<div class="alert alert-success" role="alert">
+  <%= success %>
+</div>
+<% } %>
+<% if (failure) { %>
+<div class="alert alert-danger" role="alert">
+  <%= failure %>
+</div>
+<% } %>
+<form action="/" method="POST">
+  <label for="content">Content</label><textarea id="content" name="content" rows="3" cols="30" required></textarea><br />
+  <label for="location">Location</label><input type="text" id="location" name="location" required /><br />
+  <label for="address">Address</label><input type="text" id="address" name="address" required /><br />
+  <input type="hidden" id="latitude" name="latitude" />
+  <input type="hidden" id="longitude" name="longitude" />
+  <button type="submit">Manda richiesta</button>
+</form>
+<% if (requests) { %>
+<div class="row">
+  <div class="col-sm-6">
+    <% requests.forEach(function(request) { %>
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <p>
+          <%= request.content %>
+        </p>
+        <p> Location: <%= request.location %>
+        </p>
+        <p> Address: <%= request.address %>
+        </p>
+        <p> Status: <%= request.status %>
+        </p>
+        <p>
+          <%= request.date %>
+        </p>
+        <i class="bi bi-trash-fill"></i>
+        <form action=<%="/requests/" + request.ID + "?_method=DELETE" %> method="POST">
+          <button type="submit" id="cancel_request" class="btn btn-danger">Annulla richiesta</a>
+        </form>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</div>
+<% } %>

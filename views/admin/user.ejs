@@ -1,0 +1,21 @@
+<%- include('header') %>
+<h1>Profilo di <%= surname + name %>!</h1>
+<form action="/requests" method="get">
+  <input type="submit" value="Le mie richieste" />
+</form>
+<% var success, failure; %>
+<% if (success) { %>
+<div class="alert alert-success" role="alert">
+  <%= success %>
+</div>
+<% } %>
+<% if (failure) { %>
+<div class="alert alert-danger" role="alert">
+  <%= failure %>
+</div>
+<% } %>
+<label for="fiscal_code">Codice fiscale</label><input type="fiscal_code" id="fiscal_code" name="fiscal_code" value="<%= cf %>" required /><br />
+<label for="firstName">Nome</label><input type="firstName" id="firstName" name="firstName" value="<%= name %>" required /><br />
+<label for="lastName">Cognome</label><input type="lastName" id="lastName" name="lastName" value="<%= surname %>" required /><br />
+<label for="city">Città</label><input type="city" id="city" name="city" value="<%= city %>" required /><br />
+<label for="email">Email</label><input type="email" id="email" name="email" value="<%= email %>" required /><br />

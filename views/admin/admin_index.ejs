@@ -1,0 +1,54 @@
+<%- include('../header') %>
+<h1>Ciao <%= name %>
+</h1>
+<form action="/logout?_method=DELETE" method="POST">
+  <button type="submit">Logout</button>
+</form>
+<form action="/profile" method="get">
+  <input type="submit" value="Il mio profilo" />
+</form>
+<h1>Richieste in attesa</h1>
+<% var success, failure; %>
+<% if (success) { %>
+<div class="alert alert-success" role="alert">
+  <%= success %>
+</div>
+<% } %>
+<% if (failure) { %>
+<div class="alert alert-danger" role="alert">
+  <%= failure %>
+</div>
+<% } %>
+<% if (requests) { %>
+<div class="row">
+  <div class="col-sm-6">
+    <% requests.forEach(function(request) { %>
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <p>
+          <%= request.content %>
+        </p>
+        <p> Location: <%= request.location %>
+        </p>
+        <p> Address: <%= request.address %>
+        </p>
+        <p> Status: <%= request.status %>
+        </p>
+        <p> User: <a href=<%="/profile/" + request.user_ID %>><%= request.last_name + " " + request.first_name %></a></p>
+        <p>
+          <%= request.date %>
+        </p>
+        <% if(request.status == 1) { %>
+        <form action=<%="admin/requests/" + request.ID + "?_method=PUT" %> method="POST">
+          <button type="submit" id="accept_request" class="btn btn-success">Accetta richiesta</button>
+        </form>
+        <form action=<%="admin/requests/" + request.ID + "?_method=DELETE" %> method="POST">
+          <button type="submit" id="reject_request" class="btn btn-danger">Rifiuta richiesta</button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</div>
+<% } %>

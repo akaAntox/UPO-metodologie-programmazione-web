@@ -1,3 +1,16 @@
+/* TODO LIST
+/ Add confirm password functionality
+/ Add forgot password functionality (simple change password)
+/ Add search request by filters (city / status / date)
+/ Add error status for all pages
+/ Add ENUM to request status
+/ Add JWT token to user (admin functionalities)
+/ Add showRequests, getPendingRequests
+/ Add JWT token to user (user functionalities) - almost done
+/ Add header to all pages except login/register
+/ Add GUI to all pages except login/register
+*/
+
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config(); // load .env file
 }
@@ -11,7 +24,7 @@ const methodOverride = require("method-override"); // override POST method (dele
 const jwt = require("jsonwebtoken"); // generate tokens
 
 const DataBase = require("./db"); // db.js
-const db = new DataBase();
+const db = new DataBase(); // create new database
 
 const app = express();
 const port = 3000;
@@ -60,13 +73,18 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(methodOverride("_method"));
+app.use(methodOverride("_method")); // override POST method (delete/put)
+
+// static paths
 const path = require('path');
+app.use(express.static('public')); // public folder serves static files (css, js, images)
+
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/icons')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
 
+// HOME PAGE ////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/", checkAuthenticated, async (req, res) => {
     try {
         db.open();
@@ -93,6 +111,20 @@ app.post("/", checkAuthenticated, (req, res) => {
     }
 });
 
+app.get("/admin", checkAuthenticated, async (req, res) => {
+    try {
+        db.open();
+        const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+        db.close();
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+    } catch (e) {
+        console.log(`Error while showing requests: ${e}`);
+        db.close();
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], error: "Impossibile mostrare le richieste" });
+    }
+});
+
+// AUTHENTICATION ////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/login", checkNotAuthenticated, (_req, res) => {
     res.render("login.ejs");
 });
@@ -148,6 +180,7 @@ app.delete("/logout", function (req, res, next) {
     });
 });
 
+// ROUTES ////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/profile", checkAuthenticated, (req, res) => {
     res.render("profile.ejs", {
         cf: req.user.CF,
@@ -208,6 +241,37 @@ app.delete("/requests/:requestID", (req, res) => {
     }
 });
 
+app.route("/admin/requests/:requestID")
+    .delete(checkAuthenticated, async (req, res) => {
+        try {
+            db.open();
+            await db.setRequestStatus(req.body.id, 3);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata rifiutata", requests: requests});
+        } catch (e) {
+            console.log(`Error while rejecting request: ${e}`);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nella cancellazione della richiesta", requests: requests });
+        }
+    })
+    .put(checkAuthenticated, async (req, res) => {
+        try {
+            db.open();
+            await db.setRequestStatus(req.body.id, 2);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata accettata", requests: requests });
+        } catch (e) {
+            console.log(`Error while accepting request: ${e}`);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nell'accettare la richiesta", requests: requests });
+        }
+    });
+
+// AUTHENTICATION MIDDLEWARE ////////////////////////////////////////////////////////////////////////////////////////////////
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -222,6 +286,7 @@ function checkNotAuthenticated(req, res, next) {
     next();
 }
 
+// JWT TOKEN ////////////////////////////////////////////////////////////////////////////////////////////////
 function generateAccessToken(user) {
     return jwt.sign(user, process.env.JWT_TOKEN_KEY, { expiresIn: "1h" });
 }
