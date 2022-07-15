@@ -3,12 +3,15 @@
 <form action="/requests" method="get">
   <input type="submit" value="Le mie richieste" />
 </form>
-<% var success, failure; %>
-<% if (success) { %>
-<div class="alert alert-success" role="alert"><%= success %></div>
+<% if (messages.success) { %>
+<div class="alert alert-success" role="alert">
+  <%= messages.success %>
+</div>
 <% } %>
-<% if (failure) { %>
-<div class="alert alert-danger" role="alert"><%= failure %></div>
+<% if (messages.error) { %>
+<div class="alert alert-danger" role="alert">
+  <%= messages.error %>
+</div>
 <% } %>
 <form action="/profile" method="POST">
   <label for="fiscal_code">Codice fiscale</label><input type="fiscal_code" id="fiscal_code" name="fiscal_code" value="<%= cf %>" required /><br />

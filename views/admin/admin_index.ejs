@@ -7,16 +7,22 @@
 <form action="/profile" method="get">
   <input type="submit" value="Il mio profilo" />
 </form>
-<h1>Richieste in attesa</h1>
-<% var success, failure; %>
-<% if (success) { %>
+<h1>Richieste</h1>
+<form action="/admin">
+  <label for="status">Stato</label><input type="text" id="status" name="status"><br />
+  <label for="location">Città</label><input type="text" id="location" name="location" /><br />
+  <label for="address">Indirizzo</label><input type="text" id="address" name="address" /><br />
+
+  <button type="submit" id="filter_requests" class="btn btn-primary">Cerca</button>
+</form>
+<% if (messages.success) { %>
 <div class="alert alert-success" role="alert">
-  <%= success %>
+  <%= messages.success %>
 </div>
 <% } %>
-<% if (failure) { %>
+<% if (messages.error) { %>
 <div class="alert alert-danger" role="alert">
-  <%= failure %>
+  <%= messages.error %>
 </div>
 <% } %>
 <% if (requests) { %>

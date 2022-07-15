@@ -1,27 +1,25 @@
 /* TODO LIST
-/ Add confirm password functionality
-/ Add forgot password functionality (simple change password)
-/ Add search request by filters (city / status / date)
-/ Add error status for all pages
-/ Add ENUM to request status
+/ Add search request by filters (city / status / date) ------ current
+/ Add error status for all pages (404, 500, etc)
+/ Add ENUM to request status -----
 / Add JWT token to user (admin functionalities)
-/ Add showRequests, getPendingRequests
-/ Add JWT token to user (user functionalities) - almost done
 / Add header to all pages except login/register
-/ Add GUI to all pages except login/register
+/ Add GUI to all pages - 1.5/6 pages done (login OK, register IN PROGRESS)
 */
 
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config(); // load .env file
 }
+
 const express = require("express"); // import express
 const morgan = require("morgan"); // log requests
 const bcrypt = require("bcrypt"); // hash passwords
-const passport = require("passport"); // passport-config.js
 const flash = require("express-flash"); // flash messages
 const session = require("express-session"); // session middleware
 const methodOverride = require("method-override"); // override POST method (delete)
-const jwt = require("jsonwebtoken"); // generate tokens
+const jwt = require("jsonwebtoken"); // generate JWT tokens
+const passport = require("passport");  // passport
+const STATUS = require("./public/js/status"); // import status
 
 const DataBase = require("./db"); // db.js
 const db = new DataBase(); // create new database
@@ -29,13 +27,13 @@ const db = new DataBase(); // create new database
 const app = express();
 const port = 3000;
 
-const initializePassport = require("./passport-config");
+const initializePassport = require("./public/js/passport-config");
 initializePassport(
     passport,
-    async (email) => {
+    (email) => {
         try {
             db.open();
-            const userFound = await db.findUserByEmail(email);
+            const userFound = db.findUserByEmail(email);
             db.close();
             return userFound;
         } catch (e) {
@@ -44,10 +42,10 @@ initializePassport(
             return null;
         }
     },
-    async (id) => {
+    (id) => {
         try {
             db.open();
-            const userFound = await db.findUserByID(id);
+            const userFound = db.findUserByID(id);
             db.close();
             return userFound;
         } catch (e) {
@@ -57,6 +55,7 @@ initializePassport(
         }
     }
 );
+
 
 app.set("view engine", "ejs");
 
@@ -86,28 +85,33 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')))
 
 // HOME PAGE ////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/", checkAuthenticated, async (req, res) => {
+    // console.log(STATUS[1]);
     try {
         db.open();
-        const requests = await db.getRequests("ORDER BY date DESC LIMIT 5");
+        const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
         db.close();
-        res.render("index.ejs", { name: req.user.first_name, requests: requests });
+        res.status(302).render("index.ejs", { name: req.user.first_name, requests: requests });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
-        res.render("index.ejs", { name: req.user.first_name, requests: [], error: "Impossibile mostrare le richieste" });
+        req.flash("error", "Impossibile mostrare le richieste");
+        res.status(400).res.render("index.ejs", { name: req.user.first_name, requests: [] });
     }
 });
 
-app.post("/", checkAuthenticated, (req, res) => {
+app.post("/", checkAuthenticated, async (req, res) => {
     try {
         db.open();
-        db.addNewRequest(req.user.ID, req.body.content, req.body.location, req.body.address, req.body.latitude, req.body.longitude);
+        await db.addNewRequest(req.user.ID, req.body.content, req.body.location, req.body.address, req.body.latitude, req.body.longitude);
+        const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
         db.close();
-        res.render("index.ejs", { name: req.user.first_name, success: "La tua richiesta verrà presa in carico prima possibile." });
+        req.flash("success", "La tua richiesta verrà presa in carico prima possibile.");
+        res.render("index.ejs", { name: req.user.first_name, requests: requests });
     } catch (e) {
         console.log(`Error while adding request: ${e}`);
         db.close();
-        res.render("index.ejs", { name: req.user.first_name, error: "Errore nell'aggiunta della richiesta" });
+        req.flash("error", "Impossibile spedire la richiesta");
+        res.render("index.ejs", { name: req.user.first_name, requests: [] });
     }
 });
 
@@ -120,7 +124,8 @@ app.get("/admin", checkAuthenticated, async (req, res) => {
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], error: "Impossibile mostrare le richieste" });
+        req.flash("error", "Impossibile mostrare le richieste");
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [] });
     }
 });
 
@@ -143,12 +148,45 @@ app.post(
     // }
 );
 
+app.get("/login/forgot-password", checkNotAuthenticated, (req, res) => {
+    res.render("forgot-password.ejs");
+});
+
+app.post("/login/forgot-password", checkNotAuthenticated, async (req, res) => {
+    try {
+        if (req.body.password !== req.body.confirmPassword) {
+            req.flash("error", "Le password non corrispondono");
+            res.render("forgot-password.ejs");
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        db.open();
+        await db.changeUserPassword(req.body.email, hashedPassword);
+        db.close();
+        // res.render("login.ejs", { success: "La tua password è stata cambiata con successo" });
+        req.flash("success", "La tua password è stata cambiata con successo");
+        res.redirect("/login");
+    } catch (e) {
+        console.log(`Error while changing password: ${e}`);
+        db.close();
+        req.flash("error", "Impossibile cambiare la password");
+        res.render("forgot-password.ejs");
+    }
+});
+
 app.get("/register", checkNotAuthenticated, (_req, res) => {
     res.render("register.ejs");
 });
 
 app.post("/register", checkNotAuthenticated, async (req, res) => {
     try {
+        if (req.body.password !== req.body.confirmPassword) {
+            req.flash("error", "Le password non corrispondono");
+            res.render("register.ejs");
+            return;
+        }
+
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         db.open();
         db.addNewUser(
@@ -163,10 +201,12 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
                 hashedPassword]
         );
         db.close();
+        req.flash("success", "La tua registrazione è stata effettuata con successo");
         res.redirect("/login");
     } catch (e) {
-        console.log("Error while registering");
+        console.log("Error while registering: " + e);
         db.close();
+        req.flash("error", "Impossibile registrare l'utente");
         res.redirect("/register");
     }
 });
@@ -176,6 +216,7 @@ app.delete("/logout", function (req, res, next) {
         if (err) {
             return next(err);
         }
+        req.flash("success", "Logout effettuato con successo");
         res.redirect("/login");
     });
 });
@@ -196,18 +237,19 @@ app.post("/profile", checkAuthenticated, async (req, res) => {
         db.open();
         db.updateUser(req.user.ID, req.body.firstName, req.body.lastName, req.body.city);
         db.close();
+        req.flash("success", "Profilo aggiornato con successo");
         res.render("profile.ejs", {
             cf: req.user.CF,
             name: req.body.firstName,
             surname: req.body.lastName,
             city: req.body.city,
-            email: req.user.email,
-            success: "Profilo aggiornato con successo"
+            email: req.user.email
         });
     } catch (e) {
         console.log(`Error while updating profile: ${e}`);
         db.close();
-        res.render("profile.ejs", { name: req.user.first_name, error: "Aggiornamento profilo fallito" });
+        req.flash("error", "Impossibile aggiornare il profilo");
+        res.render("profile.ejs", { name: req.user.first_name });
     }
 });
 
@@ -216,26 +258,28 @@ app.get("/requests", checkAuthenticated, async (req, res) => {
         db.open();
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC");
         db.close();
-        res.render("requests.ejs", { requests: requests, name: req.user.first_name, surname: req.user.last_name });
+        res.render("requests.ejs", { requests: requests });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
-        // res.render("profile.ejs", { name: req.user.first_name, error: "Impossibile mostrare le richieste" });
+        req.flash("error", "Impossibile mostrare le richieste");
         prevURL = req.header('Referer') || '/';
         res.redirect(prevURL);
     }
 });
 
-app.delete("/requests/:requestID", (req, res) => {
+app.delete("/requests/:requestID", checkAuthenticated, (req, res) => {
     try {
         db.open();
         db.setRequestStatus(req.params.requestID, 4);
         db.close();
+        req.flash("success", "Richiesta annullata con successo");
         prevURL = req.header('Referer') || '/';
         res.status(200).redirect(prevURL);
     } catch (e) {
         console.log(`Error while canceling request: ${e}`);
         db.close();
+        req.flash("error", "Impossibile annullare la richiesta");
         prevURL = req.header('Referer') || '/';
         res.status(400).redirect(prevURL);
     }
@@ -248,12 +292,14 @@ app.route("/admin/requests/:requestID")
             await db.setRequestStatus(req.body.id, 3);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata rifiutata", requests: requests});
+            req.flash("success", "Richiesta rifiutata con successo");
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
         } catch (e) {
             console.log(`Error while rejecting request: ${e}`);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nella cancellazione della richiesta", requests: requests });
+            req.flash("error", "Impossibile rifiutare la richiesta");
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
         }
     })
     .put(checkAuthenticated, async (req, res) => {
@@ -262,12 +308,14 @@ app.route("/admin/requests/:requestID")
             await db.setRequestStatus(req.body.id, 2);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata accettata", requests: requests });
+            req.flash("success", "Richiesta accettata con successo");
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
         } catch (e) {
             console.log(`Error while accepting request: ${e}`);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nell'accettare la richiesta", requests: requests });
+            req.flash("error", "Impossibile accettare la richiesta");
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
         }
     });
 

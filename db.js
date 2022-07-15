@@ -63,6 +63,16 @@ class DataBase {
         });
     }
 
+    changeUserPassword(email, password) {
+        return new Promise((resolve, reject) => {
+            const sql = `UPDATE Users SET password = ? WHERE email = ?`;
+            db.run(sql, [password, email], (err, row) => {
+                if(err) throw reject(err);
+                resolve(row);
+            });
+        });
+    }
+
     findUserByEmail(email) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE email = ?`;
