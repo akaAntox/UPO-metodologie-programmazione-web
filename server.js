@@ -258,7 +258,7 @@ app.get("/requests", checkAuthenticated, async (req, res) => {
         db.open();
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC");
         db.close();
-        res.render("requests.ejs", { requests: requests });
+        res.render("requests.ejs", { requests: requests, name: req.user.first_name });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
