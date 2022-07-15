@@ -1,6 +1,5 @@
 <%- include('../header') %>
-<h1>Ciao <%= name %>
-</h1>
+<h1>Ciao <%= name %></h1>
 <form action="/logout?_method=DELETE" method="POST">
   <button type="submit">Logout</button>
 </form>
@@ -8,13 +7,14 @@
   <input type="submit" value="Il mio profilo" />
 </form>
 <h1>Richieste</h1>
+
 <form action="/admin">
   <label for="status">Stato</label><input type="text" id="status" name="status"><br />
   <label for="location">Città</label><input type="text" id="location" name="location" /><br />
   <label for="address">Indirizzo</label><input type="text" id="address" name="address" /><br />
-
   <button type="submit" id="filter_requests" class="btn btn-primary">Cerca</button>
 </form>
+
 <% if (messages.success) { %>
 <div class="alert alert-success" role="alert">
   <%= messages.success %>
@@ -25,6 +25,7 @@
   <%= messages.error %>
 </div>
 <% } %>
+
 <% if (requests) { %>
 <div class="row">
   <div class="col-sm-6">
@@ -32,17 +33,18 @@
     <div class="card" style="width: 18rem;">
       <div class="card-body">
         <p>
-          <%= request.content %>
+            Dettagli: <%= request.content %>
         </p>
-        <p> Location: <%= request.location %>
+        <p> Città: <%= request.location %>
         </p>
-        <p> Address: <%= request.address %>
+        <p> Indirizzo: <%= request.address %>
         </p>
-        <p> Status: <%= request.status %>
+        <p> Stato: <%= status[request.status] %>
+        </p>
+        <p> Coordinate: <%= request.latitude + " " + request.longitude%>
         </p>
         <p> User: <a href=<%="/profile/" + request.user_ID %>><%= request.last_name + " " + request.first_name %></a></p>
-        <p>
-          <%= request.date %>
+        <p> <%= request.date %>
         </p>
         <% if(request.status == 1) { %>
         <form action=<%="admin/requests/" + request.ID + "?_method=PUT" %> method="POST">

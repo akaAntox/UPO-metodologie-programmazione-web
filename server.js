@@ -1,9 +1,7 @@
 /* TODO LIST
-/ Add search request by filters (city / status / date) ------ current
+/ Add search request by filters (city / status / date)
 / Add error status for all pages (404, 500, etc)
-/ Add ENUM to request status -----
 / Add JWT token to user (admin functionalities)
-/ Add header to all pages except login/register
 / Add GUI to all pages - 1.5/6 pages done (login OK, register IN PROGRESS)
 */
 
@@ -21,7 +19,7 @@ const jwt = require("jsonwebtoken"); // generate JWT tokens
 const passport = require("passport");  // passport
 const STATUS = require("./public/js/status"); // import status
 
-const DataBase = require("./db"); // db.js
+const DataBase = require("./public/js/db"); // db.js
 const db = new DataBase(); // create new database
 
 const app = express();
@@ -90,12 +88,12 @@ app.get("/", checkAuthenticated, async (req, res) => {
         db.open();
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
         db.close();
-        res.status(302).render("index.ejs", { name: req.user.first_name, requests: requests });
+        res.status(302).render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
         req.flash("error", "Impossibile mostrare le richieste");
-        res.status(400).res.render("index.ejs", { name: req.user.first_name, requests: [] });
+        res.status(400).res.render("index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
 });
 
@@ -106,12 +104,12 @@ app.post("/", checkAuthenticated, async (req, res) => {
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
         db.close();
         req.flash("success", "La tua richiesta verrà presa in carico prima possibile.");
-        res.render("index.ejs", { name: req.user.first_name, requests: requests });
+        res.render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while adding request: ${e}`);
         db.close();
         req.flash("error", "Impossibile spedire la richiesta");
-        res.render("index.ejs", { name: req.user.first_name, requests: [] });
+        res.render("index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
 });
 
@@ -120,12 +118,30 @@ app.get("/admin", checkAuthenticated, async (req, res) => {
         db.open();
         const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
         db.close();
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
         req.flash("error", "Impossibile mostrare le richieste");
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [] });
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
+    }
+});
+
+app.post("/admin", checkAuthenticated, async (req, res) => {
+    try {
+        db.open();
+        let filter;
+        // if (req.body.status)
+        //     if (req.body.location)
+        //         if (req.body.address)
+        //             const requests = await db.getRequests(filter + "ORDER BY date ASC");
+        db.close();
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
+    } catch (e) {
+        console.log(`Error while updating request: ${e}`);
+        db.close();
+        req.flash("error", "Impossibile aggiornare la richiesta");
+        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
 });
 
@@ -190,15 +206,16 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         db.open();
         db.addNewUser(
-            // add new user to database
-            [req.body.firstName,
-            req.body.lastName,
-            req.body.gender,
-            req.body.birthDate,
-            req.body.city,
-            req.body.province,
-            req.body.email,
-                hashedPassword]
+            [
+                req.body.firstName,
+                req.body.lastName,
+                req.body.gender,
+                req.body.birthDate,
+                req.body.city,
+                req.body.province,
+                req.body.email,
+                hashedPassword
+            ]
         );
         db.close();
         req.flash("success", "La tua registrazione è stata effettuata con successo");
@@ -258,7 +275,7 @@ app.get("/requests", checkAuthenticated, async (req, res) => {
         db.open();
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC");
         db.close();
-        res.render("requests.ejs", { requests: requests, name: req.user.first_name });
+        res.render("requests.ejs", { requests: requests, name: req.user.first_name, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         db.close();
@@ -293,13 +310,13 @@ app.route("/admin/requests/:requestID")
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
             req.flash("success", "Richiesta rifiutata con successo");
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         } catch (e) {
             console.log(`Error while rejecting request: ${e}`);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
             req.flash("error", "Impossibile rifiutare la richiesta");
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         }
     })
     .put(checkAuthenticated, async (req, res) => {
@@ -309,13 +326,13 @@ app.route("/admin/requests/:requestID")
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
             req.flash("success", "Richiesta accettata con successo");
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         } catch (e) {
             console.log(`Error while accepting request: ${e}`);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
             db.close();
             req.flash("error", "Impossibile accettare la richiesta");
-            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests });
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         }
     });
 
