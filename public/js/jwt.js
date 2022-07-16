@@ -30,11 +30,14 @@ function authenticateToken(req, res, next) {
 
 async function checkRole(id) {
     const userFound = await db.findUserByID(id);
+    isAdmin(userFound.token);
+}
 
-    const decoded = jwt_decode(userFound.token);
+function isAdmin(token) {
+    const decoded = jwt_decode(token);
     if (decoded.role === 0)
         return 1;
     return 0;
 }
 
-module.exports = { authenticateToken, generateAccessToken, checkRole };
+module.exports = { authenticateToken, generateAccessToken, checkRole, isAdmin };

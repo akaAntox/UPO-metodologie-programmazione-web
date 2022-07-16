@@ -1,4 +1,4 @@
-const { checkRole } = require("./jwt"); // check if user is admin
+const { isAdmin } = require("./jwt"); // check if user is admin
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -15,17 +15,19 @@ function checkNotAuthenticated(req, res, next) {
 }
 
 function checkIsAdmin(req, res, next) {
-    if (checkRole(req.user.ID)) {
+    if (isAdmin(req.user.token)) {
         return res.redirect("/admin");
     }
     next();
 }
 
 function checkIsNotAdmin(req, res, next) {
-    if (checkRole(req.user.ID)) {
+    if (isAdmin(req.user.token)) {
         return next();
     }
-    res.redirect("/");
+    req.flash("error", "Non hai i permessi per andare su quella pagina");
+    prevURL = req.header('Referer') || '/';
+    res.status(200).redirect(prevURL);
 }
 
 module.exports = { checkAuthenticated, checkNotAuthenticated, checkIsAdmin, checkIsNotAdmin };

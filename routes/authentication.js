@@ -7,7 +7,7 @@ const flash = require("express-flash");
 const passport = require("passport");  // passport
 const morgan = require("morgan");
 const { checkNotAuthenticated } = require("../public/js/check-auth");
-const { generateAccessToken, checkRole } = require("../public/js/jwt");
+const { generateAccessToken } = require("../public/js/jwt");
 
 router.use(flash());
 router.use(passport.initialize());
