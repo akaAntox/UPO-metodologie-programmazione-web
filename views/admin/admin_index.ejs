@@ -8,8 +8,14 @@
 </form>
 <h1>Richieste</h1>
 
-<form action="/admin">
-  <label for="status">Stato</label><input type="text" id="status" name="status"><br />
+<form action="/admin" method="POST">
+  <% if(status) { %>
+  <select class="form-select" id="status" name="status">
+    <% for (let i = 1; i <= Object.keys(status).length; i++) { %>
+      <option value="<%= i %>"><%= status[i] %></option>
+    <% } %>
+  </select>
+  <% } %>
   <label for="location">Città</label><input type="text" id="location" name="location" /><br />
   <label for="address">Indirizzo</label><input type="text" id="address" name="address" /><br />
   <button type="submit" id="filter_requests" class="btn btn-primary">Cerca</button>

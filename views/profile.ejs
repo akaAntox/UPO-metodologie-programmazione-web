@@ -1,9 +1,6 @@
 <%- include('header') %>
 <%- include('sticky-menu') %>
 <h1>Ciao <%= name %>, qui puoi modificare il tuo profilo!</h1>
-<form action="/requests" method="get">
-  <input type="submit" value="Le mie richieste" />
-</form>
 <% if (messages.success) { %>
 <div class="alert alert-success" role="alert">
   <%= messages.success %>

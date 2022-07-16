@@ -4,13 +4,9 @@
   navigator.geolocation.getCurrentPosition(function(position, err) {
     if (err) throw err;
     document.getElementById("latitude").value = position.coords.latitude;
-    document.getElementById("losrngitude").value = position.coords.longitude;
+    document.getElementById("longitude").value = position.coords.longitude;
   });
 </script>
-<h1>Richieste</h1>
-<form action="/profile" method="get">
-  <input type="submit" value="Il mio profilo" />
-</form>
 <h1>Effettua una richiesta di emergenza</h1>
 <% if (messages.success) { %>
 <div class="alert alert-success" role="alert">
@@ -23,9 +19,9 @@
 </div>
 <% } %>
 <form action="/" method="POST">
-  <label for="content">Content</label><textarea id="content" name="content" rows="3" cols="30" required></textarea><br />
-  <label for="location">Location</label><input type="text" id="location" name="location" required /><br />
-  <label for="address">Address</label><input type="text" id="address" name="address" required /><br />
+  <label for="content">Dettagli</label><textarea id="content" name="content" rows="3" cols="30" required></textarea><br />
+  <label for="location">Città</label><input type="text" id="location" name="location" required /><br />
+  <label for="address">Indirizzo</label><input type="text" id="address" name="address" required /><br />
   <input type="hidden" id="latitude" name="latitude" />
   <input type="hidden" id="longitude" name="longitude" />
   <button type="submit">Manda richiesta</button>
@@ -39,11 +35,11 @@
         <p>
           <%= request.content %>
         </p>
-        <p> Location: <%= request.location %>
+        <p> Città: <%= request.location %>
         </p>
-        <p> Address: <%= request.address %>
+        <p> Indirizzo: <%= request.address %>
         </p>
-        <p> Status: <%= status[request.status] %>
+        <p> Stato: <%= status[request.status] %>
         </p>
         <p>
           <%= request.date %>
