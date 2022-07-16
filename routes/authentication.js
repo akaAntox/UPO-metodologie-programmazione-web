@@ -23,8 +23,7 @@ initializePassport(
     passport,
     (email) => {
         try {
-            const userFound = db.findUserByEmail(email);
-            return userFound;
+            return db.findUserByEmail(email);
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
             db.close();
@@ -33,8 +32,7 @@ initializePassport(
     },
     (id) => {
         try {
-            const userFound = db.findUserByID(id);
-            return userFound;
+            return db.findUserByID(id);
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
             db.close();
@@ -58,7 +56,7 @@ router.post(
     })
 );
 
-router.get("/login/forgot-password", checkNotAuthenticated, (req, res) => {
+router.get("/login/forgot-password", checkNotAuthenticated, (_req, res) => {
     res.render("forgot-password.ejs");
 });
 
