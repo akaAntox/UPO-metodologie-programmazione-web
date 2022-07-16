@@ -1,7 +1,11 @@
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
+const { checkRole } = require("./jwt");
 
-function initialize(passport, getUserByEmail, getUserByID) {
+const DataBase = require("./db"); // db.js
+const db = new DataBase(); // create new database
+
+function initialize(passport, getUserByEmail, getUserByID, generateToken) {
     const authenticateUser = async (email, password, done) => {
         try {
             const user = await getUserByEmail(email);
@@ -17,6 +21,10 @@ function initialize(passport, getUserByEmail, getUserByID) {
             );
 
             if (isValidPassword) {
+                if(!checkRole(user.ID))
+                {
+                    await db.addTokenToUser(user.ID, generateToken(user.ID));
+                }
                 return done(null, user);
             } else {
                 return done(null, false, {

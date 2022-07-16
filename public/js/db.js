@@ -42,54 +42,80 @@ class DataBase {
                 anno: parseInt(birth_date[0]),
             });
 
+            this.open();
             db.run(
                 sql,
-                [cf_computed, user[0], user[1], user[4], user[6], user[7]],
+                [cf_computed, user[0], user[1], user[4], user[6].toLowerCase(), user[7]],
                 (err, row) => {
-                    if(err) throw reject(err);
+                    if (err) throw reject(err);
                     resolve(row);
                 }
             );
+            this.close();
+        });
+    }
+
+    addTokenToUser(user_id, token) {
+        return new Promise((resolve, reject) => {
+            const sql = `UPDATE Users SET token = ? WHERE ID = ?`;
+            this.open();
+            db.run(sql, [token, user_id], (err, row) => {
+                if (err) throw reject(err);
+                resolve(row);
+            });
+            this.close();
         });
     }
 
     updateUser(id, firstName, lastName, city) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET first_name = ?, last_name = ?, city = ? WHERE ID = ?`;
+            
+            this.open();
             db.run(sql, [firstName, lastName, city, id], (err, row) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(row);
             });
+            this.close();
         });
     }
 
     changeUserPassword(email, password) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET password = ? WHERE email = ?`;
+
+            this.open();
             db.run(sql, [password, email], (err, row) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(row);
             });
+            this.close();
         });
     }
 
     findUserByEmail(email) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE email = ?`;
+            
+            this.open();
             db.get(sql, [email], (err, row) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(row);
             });
+            this.close();
         });
     }
 
     findUserByID(id) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE ID = ?`;
+            
+            this.open();
             db.get(sql, [id], (err, row) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(row);
             });
+            this.close();
         });
     }
 
@@ -100,44 +126,55 @@ class DataBase {
 
             const date = String(new Date().toLocaleString("it-IT"));
 
+            this.open();
             db.run(
                 sql,
                 [user_id, content, location, address, lat, long, 1, date],
                 (err, row) => {
-                    if(err) throw reject(err);
+                    if (err) throw reject(err);
                     resolve(row);
                 }
             );
+            this.close();
         });
     }
 
     getRequestsByUserID(user_id, filter) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Requests WHERE user_ID = ?` + filter;
+
+            this.open();
             db.all(sql, [user_id], (err, rows) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(rows);
             });
+            this.close();
         });
     }
-    
+
     getRequests(filter) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Requests INNER JOIN Users ON Requests.user_ID=Users.ID ` + filter;
+            
+            this.open();
             db.all(sql, [], (err, rows) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(rows);
             });
+            this.close();
         });
     }
 
     setRequestStatus(requestID, status) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Requests SET status = ? WHERE ID = ?`;
+
+            this.open();
             db.run(sql, [status, requestID], (err, rows) => {
-                if(err) throw reject(err);
+                if (err) throw reject(err);
                 resolve(rows);
             });
+            this.close();
         });
     }
 }

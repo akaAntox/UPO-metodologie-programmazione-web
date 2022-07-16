@@ -1,6 +1,6 @@
 module.exports = {
-    1: "Pending",
-    2: "Accepted",
-    3: "Rejected",
-    4: "Cancelled"
+    1: "In attesa",
+    2: "Accettata",
+    3: "Rifiutata",
+    4: "Cancellata"
 }
