@@ -14,7 +14,7 @@ const session = require("express-session"); // session middleware
 const methodOverride = require("method-override"); // override POST method (delete)
 const passport = require("passport");  // passport
 const STATUS = require("./public/js/status"); // import status
-const { checkAuthenticated, checkIsAdmin } = require("./public/js/check-auth"); // check if user is authenticated
+const { checkAuthenticated, checkIsNotAdmin } = require("./public/js/check-auth"); // check if user is authenticated
 
 const DataBase = require("./public/js/db"); // db.js
 const db = new DataBase(); // create new database
@@ -49,12 +49,10 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
 
 // HOME PAGE ////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
+app.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     // console.log(STATUS[1]);
     try {
-        db.open();
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
-        db.close();
         res.status(302).render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
@@ -64,12 +62,10 @@ app.get("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
     }
 });
 
-app.post("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
+app.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     try {
-        db.open();
         await db.addNewRequest(req.user.ID, req.body.content, req.body.location, req.body.address, req.body.latitude, req.body.longitude);
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC LIMIT 5");
-        db.close();
         req.flash("success", "La tua richiesta verrà presa in carico prima possibile.");
         res.render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
@@ -86,7 +82,7 @@ app.use("/", authRoutes);
 const profileRoutes = require("./routes/profile");
 app.use("/profile", profileRoutes);
 
-const requestsRoutes = require("./routes/authentication");
+const requestsRoutes = require("./routes/requests");
 app.use("/requests", requestsRoutes);
 
 const adminRoutes = require("./routes/admin");

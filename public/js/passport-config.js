@@ -23,9 +23,7 @@ function initialize(passport, getUserByEmail, getUserByID, generateToken) {
             if (isValidPassword) {
                 if(!checkRole(user.ID))
                 {
-                    db.open();
                     await db.addTokenToUser(user.ID, generateToken(user.ID));
-                    db.close();
                 }
                 return done(null, user);
             } else {

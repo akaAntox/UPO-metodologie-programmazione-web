@@ -7,7 +7,7 @@ const flash = require("express-flash");
 const passport = require("passport");  // passport
 const morgan = require("morgan");
 const { checkNotAuthenticated } = require("../public/js/check-auth");
-const { generateAccessToken } = require("../public/js/jwt");
+const { generateAccessToken, checkRole } = require("../public/js/jwt");
 
 router.use(flash());
 router.use(passport.initialize());
@@ -21,11 +21,9 @@ const db = new DataBase(); // create new database
 const initializePassport = require("../public/js/passport-config");
 initializePassport(
     passport,
-    async (email) => {
+    (email) => {
         try {
-            db.open();
-            const userFound = await db.findUserByEmail(email);
-            db.close();
+            const userFound = db.findUserByEmail(email);
             return userFound;
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
@@ -33,11 +31,9 @@ initializePassport(
             return null;
         }
     },
-    async (id) => {
+    (id) => {
         try {
-            db.open();
-            const userFound = await db.findUserByID(id);
-            db.close();
+            const userFound = db.findUserByID(id);
             return userFound;
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
@@ -75,10 +71,8 @@ router.post("/login/forgot-password", checkNotAuthenticated, async (req, res) =>
         }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        db.open();
         await db.changeUserPassword(req.body.email, hashedPassword);
-        db.close();
-        // res.render("login.ejs", { success: "La tua password è stata cambiata con successo" });
+        
         req.flash("success", "La tua password è stata cambiata con successo");
         res.redirect("/login");
     } catch (e) {
@@ -108,7 +102,6 @@ router.post("/register", checkNotAuthenticated, async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        db.open();
         await db.addNewUser(
             [
                 req.body.firstName,
@@ -125,7 +118,6 @@ router.post("/register", checkNotAuthenticated, async (req, res) => {
         const userFound = await db.findUserByEmail(req.body.email);
         await db.addTokenToUser(userFound.ID, generateAccessToken(userFound.ID));
 
-        db.close();
         req.flash("success", "Registrazione avvenuta con successo");
         res.redirect("/login");
     } catch (e) {

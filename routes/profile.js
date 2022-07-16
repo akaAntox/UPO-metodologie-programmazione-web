@@ -23,9 +23,8 @@ router.get("/", checkAuthenticated, (req, res) => {
 
 router.post("/", checkAuthenticated, async (req, res) => {
     try {
-        db.open();
         db.updateUser(req.user.ID, req.body.firstName, req.body.lastName, req.body.city);
-        db.close();
+        
         req.flash("success", "Profilo aggiornato con successo");
         res.render("profile.ejs", {
             cf: req.user.CF,

@@ -15,10 +15,8 @@ const DataBase = require("../public/js/db"); // db.js
 const db = new DataBase(); // create new database
 
 router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
-    try {
-        db.open();
+    try {        
         const requests = await db.getRequestsByUserID(req.user.ID, "ORDER BY date DESC");
-        db.close();
         res.render("requests.ejs", { requests: requests, name: req.user.first_name, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
@@ -31,9 +29,8 @@ router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
 
 router.delete("/:requestID", checkAuthenticated, checkIsNotAdmin, (req, res) => {
     try {
-        db.open();
         db.setRequestStatus(req.params.requestID, 4);
-        db.close();
+        
         req.flash("success", "Richiesta annullata con successo");
         prevURL = req.header('Referer') || '/';
         res.status(200).redirect(prevURL);

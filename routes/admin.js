@@ -12,9 +12,7 @@ const db = new DataBase(); // create new database
 
 router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     try {
-        db.open();
         const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
-        db.close();
         res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
@@ -26,8 +24,6 @@ router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
 
 router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     try {
-        db.open();
-
         let filter = "";
 
         if (req.body.status && req.body.location && req.body.address)
@@ -46,7 +42,6 @@ router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
             filter = `WHERE address='${req.body.address}'`;
 
         const requests = await db.getRequests(filter + " ORDER BY date ASC");
-        db.close();
         res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while updating request: ${e}`);
@@ -59,10 +54,9 @@ router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
 router.route("/requests/:requestID")
     .delete(checkAuthenticated, checkIsNotAdmin, async (req, res) => {
         try {
-            db.open();
             await db.setRequestStatus(req.body.id, 3);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
-            db.close();
+            
             req.flash("success", "Richiesta rifiutata con successo");
             res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         } catch (e) {
@@ -75,10 +69,9 @@ router.route("/requests/:requestID")
     })
     .put(checkAuthenticated, checkIsNotAdmin, async (req, res) => {
         try {
-            db.open();
             await db.setRequestStatus(req.body.id, 2);
             const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
-            db.close();
+
             req.flash("success", "Richiesta accettata con successo");
             res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
         } catch (e) {

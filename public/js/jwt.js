@@ -29,9 +29,7 @@ function authenticateToken(req, res, next) {
 }
 
 async function checkRole(id) {
-    db.open();
     const userFound = await db.findUserByID(id);
-    db.close();
 
     const decoded = jwt_decode(userFound.token);
     if (decoded.role === 0)
