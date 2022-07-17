@@ -26,9 +26,9 @@ router.get("/", checkAuthenticated, async (req, res) => {
     }
 });
 
-router.delete("/:requestID", checkAuthenticated, (req, res) => {
+router.delete("/:requestID", checkAuthenticated, async (req, res) => {
     try {
-        db.setRequestStatus(req.params.requestID, 4);
+        await db.setRequestStatus(req.params.requestID, 4);
         req.flash("success", "Richiesta annullata con successo");
         const prevURL = req.header('Referer') || '/';
         res.status(200).redirect(prevURL);

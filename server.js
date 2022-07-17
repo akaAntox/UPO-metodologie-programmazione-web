@@ -72,34 +72,6 @@ app.post("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
     }
 });
 
-app.delete("/admin/:requestID", checkAuthenticated, (req, res) => {
-    try {
-        db.setRequestStatus(req.params.requestID, 3);
-        req.flash("success", "Richiesta rifiutata con successo");
-        const prevURL = req.header('Referer') || '/';
-        res.status(200).redirect(prevURL);
-    } catch (e) {
-        console.log(`Error while rejecting request: ${e}`);
-        req.flash("error", "Impossibile rifiutare la richiesta");
-        const prevURL = req.header('Referer') || '/';
-        res.status(400).redirect(prevURL);
-    }
-});
-
-app.put("/admin/:requestID", checkAuthenticated, (req, res) => {
-    try {
-        db.setRequestStatus(req.params.requestID, 2);
-        req.flash("success", "Richiesta accettata con successo");
-        const prevURL = req.header('Referer') || '/';
-        res.status(200).redirect(prevURL);
-    } catch (e) {
-        console.log(`Error while accepting request: ${e}`);
-        req.flash("error", "Impossibile accettare la richiesta");
-        const prevURL = req.header('Referer') || '/';
-        res.status(200).redirect(prevURL);
-    }
-});
-
 const authRoutes = require("./routes/authentication");
 app.use("/", authRoutes);
 
