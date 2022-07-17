@@ -53,12 +53,12 @@
         <p> <%= request.date %>
         </p>
         <% if(request.status == 1) { %>
-        <form action=<%="admin/requests/" + request.ID + "?_method=PUT" %> method="POST">
-          <button type="submit" id="accept_request" class="btn btn-success">Accetta richiesta</button>
-        </form>
-        <form action=<%="admin/requests/" + request.ID + "?_method=DELETE" %> method="POST">
-          <button type="submit" id="reject_request" class="btn btn-danger">Rifiuta richiesta</button>
-        </form>
+          <form action=<%="admin/requests/" + request.ID + "?_method=PUT" %> method="POST">
+            <button type="submit" id="accept_request" class="btn btn-success">Accetta richiesta</button>
+          </form>
+          <form action=<%="admin/requests/" + request.ID + "?_method=DELETE" %> method="POST">
+            <button type="submit" id="reject_request" class="btn btn-danger">Rifiuta richiesta</button>
+          </form>
         <% } %>
       </div>
     </div>
