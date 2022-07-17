@@ -3,17 +3,27 @@ const router = express.Router();
 
 const methodOverride = require("method-override"); // override POST method (delete)
 const bcrypt = require("bcrypt"); // hash passwords
+const session = require("express-session"); // session middleware
 const flash = require("express-flash");
 const passport = require("passport");  // passport
 const morgan = require("morgan");
 const { checkNotAuthenticated } = require("../public/js/check-auth");
 const { generateAccessToken } = require("../public/js/jwt");
 
+router.use(express.urlencoded({ extended: false })); // url-encoded body parser
+router.use(express.json()); // json will be parsed automatically in req.body object
+router.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+router.use(morgan("tiny")); // request a logger middleware to log requests
+router.use(methodOverride("_method")); // override POST method (delete/put)
 router.use(flash());
 router.use(passport.initialize());
 router.use(passport.session());
-router.use(morgan("tiny")); // request a logger middleware to log requests
-router.use(methodOverride("_method")); // override POST method (delete/put)
 
 const DataBase = require("../public/js/db"); // db.js
 const db = new DataBase(); // create new database

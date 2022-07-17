@@ -2,13 +2,26 @@ const express = require("express");
 const router = express.Router();
 
 const methodOverride = require("method-override"); // override POST method (delete)
+const session = require('express-session');
 const flash = require("express-flash");
+const passport = require("passport");  // passport
 const morgan = require("morgan");
 const STATUS = require("../public/js/status"); // import status
-const { checkAuthenticated, checkIsNotAdmin } = require("../public/js/check-auth");
+const { checkAuthenticated } = require("../public/js/check-auth");
 
+router.use(express.urlencoded({ extended: false })); // url-encoded body parser
+router.use(express.json()); // json will be parsed automatically in req.body object
 router.use(methodOverride("_method")); // override POST method (delete/put)
+router.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 router.use(flash());
+router.use(passport.initialize());
+router.use(passport.session());
 router.use(morgan("tiny")); // request a logger middleware to log requests
 
 const DataBase = require("../public/js/db"); // db.js

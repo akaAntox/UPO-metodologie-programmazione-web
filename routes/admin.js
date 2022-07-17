@@ -2,13 +2,26 @@ const express = require("express");
 const router = express.Router();
 
 const methodOverride = require("method-override"); // override POST method (delete)
+const session = require("express-session"); // session middleware
 const flash = require("express-flash");
+const passport = require("passport");  // passport
 const morgan = require("morgan");
 const STATUS = require("../public/js/status"); // import status
 const { checkAuthenticated, checkIsNotAdmin } = require("../public/js/check-auth");
 
+router.use(express.urlencoded({ extended: false })); // url-encoded body parser
+router.use(express.json()); // json will be parsed automatically in req.body object
 router.use(methodOverride("_method")); // override POST method (delete/put)
+router.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 router.use(flash());
+router.use(passport.initialize());
+router.use(passport.session());
 router.use(morgan("tiny")); // request a logger middleware to log requests
 
 const DataBase = require("../public/js/db"); // db.js
@@ -16,7 +29,7 @@ const db = new DataBase(); // create new database
 
 router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     try {
-        const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+        const requests = await db.getRequests("WHERE status=1 ORDER BY date DESC");
         res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
@@ -44,7 +57,7 @@ router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
         else if (req.body.address)
             filter = `WHERE address='${req.body.address}'`;
 
-        const requests = await db.getRequests(filter + " ORDER BY date ASC");
+        const requests = await db.getRequests(filter + " ORDER BY date DESC");
         res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while updating request: ${e}`);
@@ -77,7 +90,7 @@ router.put("/:requestID", checkAuthenticated, async (req, res) => {
         console.log(`Error while accepting request: ${e}`);
         req.flash("error", "Impossibile accettare la richiesta");
         const prevURL = req.header('Referer') || '/';
-        res.status(200).redirect(prevURL);
+        res.status(400).redirect(prevURL);
     }
 });
 

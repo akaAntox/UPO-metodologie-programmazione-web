@@ -7,7 +7,7 @@
     document.getElementById("longitude").value = position.coords.longitude;
   });
 </script>
-<h1>Effettua una richiesta di emergenza</h1>
+
 <% if (messages.success) { %>
 <div class="alert alert-success" role="alert">
   <%= messages.success %>
@@ -18,40 +18,61 @@
   <%= messages.error %>
 </div>
 <% } %>
-<form action="/" method="POST">
-  <label for="content">Dettagli</label><textarea id="content" name="content" rows="3" cols="30" required></textarea><br />
-  <label for="location">Città</label><input type="text" id="location" name="location" required /><br />
-  <label for="address">Indirizzo</label><input type="text" id="address" name="address" required /><br />
-  <input type="hidden" id="latitude" name="latitude" />
-  <input type="hidden" id="longitude" name="longitude" />
-  <button type="submit">Manda richiesta</button>
-</form>
-<% if (requests) { %>
-<div class="row">
-  <div class="col-sm-6">
-    <% requests.forEach(function(request) { %>
-    <div class="card" style="width: 18rem;">
-      <div class="card-body">
-        <p>
-          <%= request.content %>
-        </p>
-        <p> Città: <%= request.location %>
-        </p>
-        <p> Indirizzo: <%= request.address %>
-        </p>
-        <p> Stato: <%= status[request.status] %>
-        </p>
-        <p>
-          <%= request.date %>
-        </p>
-        <% if (request.status != 4) { %>
-        <form action=<%="/requests/" + request.ID + "?_method=DELETE" %> method="POST">
-          <button type="submit" id="cancel_request" class="btn btn-danger">Annulla richiesta</a>
-        </form>
-        <% } %>
+
+<h1>Home</h1>
+
+<div class="p-4">
+  <form class="card col-12 col-md-9 align-center" action="/" method="POST">
+    <h4 class="card-header">Effettua una richiesta</h4>
+    <div class="card-body col-12">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-6 form-group mb-3">
+          <label class="form-label" for="location">Città</label><br />
+          <input class="form-control form-control-lg col-12" type="text" id="location" name="location" />
+        </div>
+        <div class="col-12 col-md-6 form-group mb-3">
+          <label class="form-label" for="address">Indirizzo</label>
+          <input class="form-control form-control-lg col-12" type="text" id="address" name="address" />
+        </div>
+        <div class="w-100"></div>
+        <div class="col-12 form-group mb-4">
+          <label class="form-label" for="content">Dettagli</label>
+          <textarea class="form-control form-control-lg col-12" type="text" id="content" name="content" rows="3"></textarea>
+        </div>
+        <div class="w-100"></div>
+        <div>
+          <button class="btn btn-primary col-12" type="submit" id="filter_requests">Manda richiesta</button>
+        </div>
+        <input type="hidden" id="latitude" name="latitude" />
+        <input type="hidden" id="longitude" name="longitude" />
       </div>
     </div>
-    <% }); %>
+  </form>
+</div>
+
+<% if (requests) { %>
+<div class="row d-flex p-4">
+  <% requests.forEach(function(request) { %>
+  <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+    <div class="card">
+      <b class="card-header">Stato: <%= status[request.status] %></b>
+      <div class="card-body">
+        <p class="card-text"><%= request.content %></p>
+        <div class="row align-items-end">
+          <p class="card-text col-6 col-md-12 mb-3">Città: <%= request.location %></p>
+          <p class="card-text col-6 col-md-12 mb-3">Indirizzo: <%= request.address %></p>
+          <div class="w-100"></div>
+          <p class="card-text col-12 col-md-12">Data: <%= request.date %></p>
+          <% if (request.status != 4) { %>
+          <div class="w-100"></div>
+          <form action=<%="/requests/" + request.ID + "?_method=DELETE" %> method="POST">
+            <button type="submit" id="cancel_request" class="col-12 btn btn-danger">Annulla richiesta</a>
+          </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
   </div>
+  <% }); %>
 </div>
 <% } %>
