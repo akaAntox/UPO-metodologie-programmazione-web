@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config(); // load .env file
+}
+
 const express = require("express");
 const router = express.Router();
 

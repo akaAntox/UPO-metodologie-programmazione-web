@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config(); // load .env file
+}
+
 const express = require("express");
 const router = express.Router();
 
@@ -13,7 +17,7 @@ router.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: false
     })
 );
 router.use(flash());

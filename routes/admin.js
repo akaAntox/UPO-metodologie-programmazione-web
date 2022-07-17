@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config(); // load .env file
+}
+
 const express = require("express");
 const router = express.Router();
 
@@ -30,11 +34,11 @@ const db = new DataBase(); // create new database
 router.get("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     try {
         const requests = await db.getRequests("WHERE status=1 ORDER BY date DESC");
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
+        res.render("admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
         req.flash("error", "Impossibile mostrare le richieste");
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
+        res.render("admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
 });
 
@@ -58,11 +62,11 @@ router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
             filter = `WHERE address='${req.body.address}'`;
 
         const requests = await db.getRequests(filter + " ORDER BY date DESC");
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
+        res.render("admin_index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while updating request: ${e}`);
         req.flash("error", "Impossibile aggiornare la richiesta");
-        res.render("admin/admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
+        res.render("admin_index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
 });
 
@@ -84,6 +88,7 @@ router.put("/:requestID", checkAuthenticated, async (req, res) => {
     try {
         await db.setRequestStatus(req.params.requestID, 2);
         req.flash("success", "Richiesta accettata con successo");
+        const msg = req.flash("success");
         const prevURL = req.header('Referer') || '/';
         res.status(200).redirect(prevURL);
     } catch (e) {
