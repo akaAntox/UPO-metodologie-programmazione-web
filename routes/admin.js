@@ -53,4 +53,32 @@ router.post("/", checkAuthenticated, checkIsNotAdmin, async (req, res) => {
     }
 });
 
+router.delete("/:requestID", checkAuthenticated, async (req, res) => {
+    try {
+        await db.setRequestStatus(req.params.requestID, 3);
+        req.flash("success", "Richiesta rifiutata con successo");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    } catch (e) {
+        console.log(`Error while rejecting request: ${e}`);
+        req.flash("error", "Impossibile rifiutare la richiesta");
+        const prevURL = req.header('Referer') || '/';
+        res.status(400).redirect(prevURL);
+    }
+});
+
+router.put("/:requestID", checkAuthenticated, async (req, res) => {
+    try {
+        await db.setRequestStatus(req.params.requestID, 2);
+        req.flash("success", "Richiesta accettata con successo");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    } catch (e) {
+        console.log(`Error while accepting request: ${e}`);
+        req.flash("error", "Impossibile accettare la richiesta");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    }
+});
+
 module.exports = router;

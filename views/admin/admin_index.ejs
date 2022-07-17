@@ -1,69 +1,79 @@
 <%- include('../header') %>
-<%- include('../sticky-menu') %>
-<h1>Ciao <%= name %></h1>
-<form action="/logout?_method=DELETE" method="POST">
-  <button type="submit">Logout</button>
-</form>
-<form action="/profile" method="get">
-  <input type="submit" value="Il mio profilo" />
-</form>
-<h1>Richieste</h1>
+  <%- include('../sticky-menu') %>
+    <h1>Ciao <%= name %>
+    </h1>
+    <form action="/logout?_method=DELETE" method="POST">
+      <button type="submit">Logout</button>
+    </form>
+    <form action="/profile" method="get">
+      <input type="submit" value="Il mio profilo" />
+    </form>
+    <h1>Richieste</h1>
 
-<form action="/admin" method="POST">
-  <% if(status) { %>
-  <select class="form-select" id="status" name="status">
-    <% for (let i = 1; i <= Object.keys(status).length; i++) { %>
-      <option value="<%= i %>"><%= status[i] %></option>
-    <% } %>
-  </select>
-  <% } %>
-  <label for="location">Città</label><input type="text" id="location" name="location" /><br />
-  <label for="address">Indirizzo</label><input type="text" id="address" name="address" /><br />
-  <button type="submit" id="filter_requests" class="btn btn-primary">Cerca</button>
-</form>
-
-<% if (messages.success) { %>
-<div class="alert alert-success" role="alert">
-  <%= messages.success %>
-</div>
-<% } %>
-<% if (messages.error) { %>
-<div class="alert alert-danger" role="alert">
-  <%= messages.error %>
-</div>
-<% } %>
-
-<% if (requests) { %>
-<div class="row">
-  <div class="col-sm-6">
-    <% requests.forEach(function(request) { %>
-    <div class="card" style="width: 18rem;">
-      <div class="card-body">
-        <p>
-            Dettagli: <%= request.content %>
-        </p>
-        <p> Città: <%= request.location %>
-        </p>
-        <p> Indirizzo: <%= request.address %>
-        </p>
-        <p> Stato: <%= status[request.status] %>
-        </p>
-        <p> Coordinate: <%= request.latitude + " " + request.longitude%>
-        </p>
-        <p> User: <a href=<%="/profile/" + request.user_ID %>><%= request.last_name + " " + request.first_name %></a></p>
-        <p> <%= request.date %>
-        </p>
-        <% if(request.status == 1) { %>
-        <form action=<%="/admin/" + request.ID + "?_method=PUT" %> method="POST">
-          <button type="submit" id="accept_request" class="btn btn-success">Accetta richiesta</button>
-        </form>
-        <form action=<%="/admin/" + request.ID + "?_method=DELETE" %> method="POST">
-          <button type="submit" id="reject_request" class="btn btn-danger">Rifiuta richiesta</button>
-        </form>
+    <form action="/admin" method="POST">
+      <% if(status) { %>
+        <select class="form-select" id="status" name="status">
+          <% for (let i=1; i <=Object.keys(status).length; i++) { %>
+            <option value="<%= i %>">
+              <%= status[i] %>
+            </option>
+            <% } %>
+        </select>
         <% } %>
+          <label for="location">Città</label><input type="text" id="location" name="location" /><br />
+          <label for="address">Indirizzo</label><input type="text" id="address" name="address" /><br />
+          <button type="submit" id="filter_requests" class="btn btn-primary">Cerca</button>
+    </form>
+
+    <% if (messages.success) { %>
+      <div class="alert alert-success" role="alert">
+        <%= messages.success %>
       </div>
-    </div>
-    <% }); %>
-  </div>
-</div>
-<% } %>
+      <% } %>
+        <% if (messages.error) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= messages.error %>
+          </div>
+          <% } %>
+
+            <% if (requests) { %>
+              <div class="row">
+                <div class="col-sm-6">
+                  <% requests.forEach(function(request) { %>
+                    <div class="card" style="width: 18rem;">
+                      <div class="card-body">
+                        <p>
+                          ID: <%= request.requestID %>
+                        </p>
+                        <p>
+                          Dettagli: <%= request.content %>
+                        </p>
+                        <p> Città: <%= request.location %>
+                        </p>
+                        <p> Indirizzo: <%= request.address %>
+                        </p>
+                        <p> Stato: <%= status[request.status] %>
+                        </p>
+                        <p> Coordinate: <%= request.latitude + " " + request.longitude%>
+                        </p>
+                        <p> User: <a href=<%="/profile/" + request.userID %>><%= request.last_name + " " +
+                              request.first_name %></a></p>
+                        <p>
+                          <%= request.date %>
+                        </p>
+                        <% if(request.status==1) { %>
+                          <form method="POST" enctype="application/x-www-form-urlencoded" action=<%="/admin/" +
+                            request.requestID + "?_method=PUT" %>>
+                            <button type="submit" id="accept_request" class="btn btn-success">Accetta richiesta</button>
+                          </form>
+                          <form method="POST" enctype="application/x-www-form-urlencoded" action=<%="/admin/" +
+                            request.requestID + "?_method=DELETE" %>>                            
+                            <button type="submit" id="reject_request" class="btn btn-danger">Rifiuta richiesta</button>
+                          </form>
+                          <% } %>
+                      </div>
+                    </div>
+                    <% }); %>
+                </div>
+              </div>
+              <% } %>
