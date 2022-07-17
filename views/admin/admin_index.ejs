@@ -72,3 +72,10 @@
   <% }); %>
 </div>
 <% } %>
+<% if(requests.length == 0) { %>
+<div class="row d-flex p-4">
+  <div class="row d-flex p-4 col-12">
+    <span class="span-custom">Nessuna richiesta trovata</span>
+  </div>
+</div>
+<% } %>

@@ -60,6 +60,7 @@ router.get("/:userID", checkAuthenticated, async (req, res) => {
         res.render("profile.ejs", {
             cf: user.CF,
             name: user.first_name,
+            shown_user_name: user.first_name,
             surname: user.last_name,
             city: user.city,
             email: user.email,

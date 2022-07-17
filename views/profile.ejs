@@ -13,17 +13,20 @@
 
 <% if(myProfile) { %>
 <%- include('header') %>
-
 <h1>Il tuo profilo</h1>
 <% } else { %>
 <link rel="stylesheet" href="../css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../css/style.css" />
-<h1>Profilo di <%= name %></h1>
+<h1>Profilo di <%= shown_user_name %></h1>
 <% } %>
 
 <div class="p-4">
   <form class="card col-12 col-md-9 align-center" action="/profile" method="POST">
-    <h4 class="card-header">Modifica profilo di <%= name %></h4>
+    <% if(myProfile) { %>
+      <h4 class="card-header">Modifica profilo</h4>
+    <% } else { %>
+      <h4 class="card-header">Modifica profilo di <%= shown_user_name %></h4>
+    <% } %>
     <div class="card-body col-12">
       <div class="form-group mb-3">
         <label class="form-label" for="fiscal_code">Codice fiscale</label><br />
