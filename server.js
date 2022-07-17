@@ -74,6 +74,36 @@ app.post("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
     }
 });
 
+app.route("/admin/requests/:requestID")
+    .delete(checkAuthenticated, async (req, res) => {
+        try {
+            db.open();
+            await db.setRequestStatus(req.body.id, 3);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata rifiutata", requests: requests});
+        } catch (e) {
+            console.log(`Error while rejecting request: ${e}`);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nella cancellazione della richiesta", requests: requests });
+        }
+    })
+    .put(checkAuthenticated, async (req, res) => {
+        try {
+            db.open();
+            await db.setRequestStatus(req.body.id, 2);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, success: "La richiesta è stata accettata", requests: requests });
+        } catch (e) {
+            console.log(`Error while accepting request: ${e}`);
+            const requests = await db.getRequests("WHERE status=1 ORDER BY date ASC");
+            db.close();
+            res.render("admin/admin_index.ejs", { name: req.user.first_name, error: "Errore nell'accettare la richiesta", requests: requests });
+        }
+    });
+
 const authRoutes = require("./routes/authentication");
 app.use("/", authRoutes);
 
