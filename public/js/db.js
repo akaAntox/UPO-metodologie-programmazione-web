@@ -58,6 +58,7 @@ class DataBase {
     addTokenToUser(user_id, token) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET token = ? WHERE ID = ?`;
+
             this.open();
             db.run(sql, [token, user_id], (err, row) => {
                 if (err) throw reject(err);
@@ -70,7 +71,7 @@ class DataBase {
     updateUser(id, firstName, lastName, city) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET first_name = ?, last_name = ?, city = ? WHERE ID = ?`;
-            
+
             this.open();
             db.run(sql, [firstName, lastName, city, id], (err, row) => {
                 if (err) throw reject(err);
@@ -96,7 +97,7 @@ class DataBase {
     findUserByEmail(email) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE email = ?`;
-            
+
             this.open();
             db.get(sql, [email], (err, row) => {
                 if (err) throw reject(err);
@@ -109,7 +110,7 @@ class DataBase {
     findUserByID(id) {
         return new Promise((resolve, reject) => {
             const sql = `SELECT * FROM Users WHERE ID = ?`;
-            
+
             this.open();
             db.get(sql, [id], (err, row) => {
                 if (err) throw reject(err);
@@ -154,8 +155,8 @@ class DataBase {
 
     getRequests(filter) {
         return new Promise((resolve, reject) => {
-            const sql = `SELECT * FROM Requests INNER JOIN Users ON Requests.user_ID=Users.ID ` + filter;
-            
+            const sql = `SELECT Requests.ID AS requestID, Requests.content, Requests.location, Requests.address, Requests.latitude, Requests.longitude, Requests.status , Requests.date , Users.ID AS userID, Users.first_name, Users.last_name FROM Requests JOIN Users ON Requests.user_ID = Users.ID ` + filter;
+
             this.open();
             db.all(sql, [], (err, rows) => {
                 if (err) throw reject(err);
@@ -167,7 +168,7 @@ class DataBase {
 
     setRequestStatus(requestID, status) {
         return new Promise((resolve, reject) => {
-            const sql = `UPDATE Requests SET status = ? WHERE ID = ?`;
+            const sql = `UPDATE Requests SET status=? WHERE ID=?`;
 
             this.open();
             db.run(sql, [status, requestID], (err, rows) => {

@@ -3,17 +3,27 @@ const router = express.Router();
 
 const methodOverride = require("method-override"); // override POST method (delete)
 const bcrypt = require("bcrypt"); // hash passwords
+const session = require("express-session"); // session middleware
 const flash = require("express-flash");
 const passport = require("passport");  // passport
 const morgan = require("morgan");
 const { checkNotAuthenticated } = require("../public/js/check-auth");
 const { generateAccessToken } = require("../public/js/jwt");
 
+router.use(express.urlencoded({ extended: false })); // url-encoded body parser
+router.use(express.json()); // json will be parsed automatically in req.body object
+router.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+router.use(morgan("tiny")); // request a logger middleware to log requests
+router.use(methodOverride("_method")); // override POST method (delete/put)
 router.use(flash());
 router.use(passport.initialize());
 router.use(passport.session());
-router.use(morgan("tiny")); // request a logger middleware to log requests
-router.use(methodOverride("_method")); // override POST method (delete/put)
 
 const DataBase = require("../public/js/db"); // db.js
 const db = new DataBase(); // create new database
@@ -26,7 +36,6 @@ initializePassport(
             return db.findUserByEmail(email);
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
-            db.close();
             return null;
         }
     },
@@ -35,7 +44,6 @@ initializePassport(
             return db.findUserByID(id);
         } catch (e) {
             console.log(`Error while logging in: ${e}`);
-            db.close();
             return null;
         }
     },
@@ -75,7 +83,6 @@ router.post("/login/forgot-password", checkNotAuthenticated, async (req, res) =>
         res.redirect("/login");
     } catch (e) {
         console.log(`Error while changing password: ${e}`);
-        db.close();
         req.flash("error", "Impossibile cambiare la password");
         res.render("forgot-password.ejs");
     }
@@ -120,7 +127,6 @@ router.post("/register", checkNotAuthenticated, async (req, res) => {
         res.redirect("/login");
     } catch (e) {
         console.log("Error while registering: " + e);
-        db.close();
         req.flash("error", "Impossibile registrare l'utente");
         res.redirect("/register");
     }
