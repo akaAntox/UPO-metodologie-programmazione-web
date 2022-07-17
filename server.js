@@ -42,6 +42,7 @@ app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist
 app.use('/icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/icons')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js/')));
 
 app.get("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
     try {
