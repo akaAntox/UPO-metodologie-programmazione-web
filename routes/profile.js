@@ -35,7 +35,6 @@ router.post("/", checkAuthenticated, async (req, res) => {
         });
     } catch (e) {
         console.log(`Error while updating profile: ${e}`);
-        db.close();
         req.flash("error", "Impossibile aggiornare il profilo");
         res.render("profile.ejs", { name: req.user.first_name });
     }

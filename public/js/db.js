@@ -58,6 +58,7 @@ class DataBase {
     addTokenToUser(user_id, token) {
         return new Promise((resolve, reject) => {
             const sql = `UPDATE Users SET token = ? WHERE ID = ?`;
+            
             this.open();
             db.run(sql, [token, user_id], (err, row) => {
                 if (err) throw reject(err);

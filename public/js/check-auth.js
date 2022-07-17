@@ -26,7 +26,7 @@ function checkIsNotAdmin(req, res, next) {
         return next();
     }
     req.flash("error", "Non hai i permessi per andare su quella pagina");
-    prevURL = req.header('Referer') || '/';
+    const prevURL = req.header('Referer') || '/';
     res.status(200).redirect(prevURL);
 }
 

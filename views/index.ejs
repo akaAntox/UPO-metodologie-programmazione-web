@@ -44,8 +44,7 @@
         <p>
           <%= request.date %>
         </p>
-        <!-- <i class="bi bi-trash-fill"></i> -->
-        <% if (request.status !=4) { %>
+        <% if (request.status != 4) { %>
         <form action=<%="/requests/" + request.ID + "?_method=DELETE" %> method="POST">
           <button type="submit" id="cancel_request" class="btn btn-danger">Annulla richiesta</a>
         </form>

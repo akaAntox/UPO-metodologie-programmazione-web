@@ -54,7 +54,6 @@ app.get("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
         res.status(302).render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while showing requests: ${e}`);
-        db.close();
         req.flash("error", "Impossibile mostrare le richieste");
         res.status(400).res.render("index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
     }
@@ -68,23 +67,50 @@ app.post("/", checkAuthenticated, checkIsAdmin, async (req, res) => {
         res.render("index.ejs", { name: req.user.first_name, requests: requests, status: STATUS });
     } catch (e) {
         console.log(`Error while adding request: ${e}`);
-        db.close();
         req.flash("error", "Impossibile spedire la richiesta");
         res.render("index.ejs", { name: req.user.first_name, requests: [], status: STATUS });
+    }
+});
+
+app.delete("/admin/:requestID", checkAuthenticated, (req, res) => {
+    try {
+        db.setRequestStatus(req.params.requestID, 3);
+        req.flash("success", "Richiesta rifiutata con successo");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    } catch (e) {
+        console.log(`Error while rejecting request: ${e}`);
+        req.flash("error", "Impossibile rifiutare la richiesta");
+        const prevURL = req.header('Referer') || '/';
+        res.status(400).redirect(prevURL);
+    }
+});
+
+app.put("/admin/:requestID", checkAuthenticated, (req, res) => {
+    try {
+        db.setRequestStatus(req.params.requestID, 2);
+        req.flash("success", "Richiesta accettata con successo");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
+    } catch (e) {
+        console.log(`Error while accepting request: ${e}`);
+        req.flash("error", "Impossibile accettare la richiesta");
+        const prevURL = req.header('Referer') || '/';
+        res.status(200).redirect(prevURL);
     }
 });
 
 const authRoutes = require("./routes/authentication");
 app.use("/", authRoutes);
 
+const adminRoutes = require("./routes/admin");
+app.use("/admin", adminRoutes);
+
 const profileRoutes = require("./routes/profile");
 app.use("/profile", profileRoutes);
 
 const requestsRoutes = require("./routes/requests");
 app.use("/requests", requestsRoutes);
-
-const adminRoutes = require("./routes/admin");
-app.use("/admin", adminRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
