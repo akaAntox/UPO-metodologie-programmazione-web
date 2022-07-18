@@ -59,7 +59,7 @@ router.get("/:userID", checkAuthenticated, async (req, res) => {
         const user = await db.findUserByID(req.params.userID);
         res.render("profile.ejs", {
             cf: user.CF,
-            name: user.first_name,
+            name: req.user.first_name,
             shown_user_name: user.first_name,
             surname: user.last_name,
             city: user.city,
