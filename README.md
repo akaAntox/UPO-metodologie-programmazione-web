@@ -1,18 +1,16 @@
 ## UPO-programmazione-web
 * [Info](#info)
-* [Install](#install)
+* [Usage](#usage)
 
 ## Info
 My simple and basic website in NodeJS and EJS with a user making requests and admins handling them.
 * You need NodeJS and npm.
 
-## Install
+## Usage
 * Install node packages:
 ```
 $ npm install
-```
 or
-```
 $ npm i
 ```
 
